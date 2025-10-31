@@ -1,4 +1,5 @@
 import 'package:commander_tinder/models/card_info.dart';
+import 'package:commander_tinder/models/commander.dart';
 import 'package:commander_tinder/widgets/card_image.dart';
 import 'package:flutter/material.dart';
 import 'package:swipe_cards/draggable_card.dart';
@@ -39,11 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
   MatchEngine? _matchEngine;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
-  final CardInfo commander = CardInfo(
-    name: "Gwen Stacy",
-    url:
-        "https://cards.scryfall.io/normal/front/b/0/b0f1597f-1dc7-465e-8fcb-0afe61bcca46.jpg?1757432940",
-  );
+  late Future<Commander> commanderFuture;
 
   final List<CardInfo> cardData = [
     CardInfo(
@@ -547,6 +544,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    commanderFuture = Commander.fromUrl(
+      "https://json.edhrec.com/pages/commanders/gwen-stacy.json",
+    );
     for (int i = 0; i < cardData.length; i++) {
       _swipeItems.add(
         SwipeItem(
@@ -569,97 +569,110 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(title: Text(widget.title!)),
-      body: Row(
-        children: [
-          Expanded(
-            child: Card(
-              child: Column(
-                children: [
-                  Text("Commander:"),
-                  Text(commander.name),
-                  CardImage(url: commander.url),
-                ],
+    return FutureBuilder<Commander>(
+      future: commanderFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData) {
+          return const Center(child: Text('No commander found'));
+        }
+        final commander = snapshot.data!;
+        return Scaffold(
+          key: _scaffoldKey,
+          appBar: AppBar(title: Text(widget.title!)),
+          body: Row(
+            children: [
+              Expanded(
+                child: Card(
+                  child: Column(
+                    children: [
+                      Text("Commander:"),
+                      Text(commander.name),
+                      CardImage(url: commander.image_url),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-          Card(
-            child: Container(
-              constraints: BoxConstraints(maxWidth: 1000),
-              child: SwipeCards(
-                matchEngine: _matchEngine!,
-                itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                    alignment: Alignment.center,
-                    child: _swipeItems[index].content,
-                  );
-                },
-                onStackFinished: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Stack Finished"),
-                      duration: Duration(milliseconds: 500),
-                    ),
-                  );
-                },
-                itemChanged: (SwipeItem item, int index) {},
-                leftSwipeAllowed: true,
-                rightSwipeAllowed: true,
-                upSwipeAllowed: false,
-                fillSpace: true,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Card(
-              child: Column(
-                children: [
-                  Text("Deck"),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 8.0,
-                    ),
-                    child: Column(
-                      children: [
-                        LinearProgressIndicator(
-                          value: deck.length / 99,
-                          minHeight: 8,
-                          backgroundColor: Colors.grey[300],
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.pink,
-                          ),
+              Card(
+                child: Container(
+                  constraints: BoxConstraints(maxWidth: 1000),
+                  child: SwipeCards(
+                    matchEngine: _matchEngine!,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Container(
+                        alignment: Alignment.center,
+                        child: _swipeItems[index].content,
+                      );
+                    },
+                    onStackFinished: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Stack Finished"),
+                          duration: Duration(milliseconds: 500),
                         ),
-                        SizedBox(height: 8),
-                        Text('${deck.length} / 99'),
-                      ],
-                    ),
+                      );
+                    },
+                    itemChanged: (SwipeItem item, int index) {},
+                    leftSwipeAllowed: true,
+                    rightSwipeAllowed: true,
+                    upSwipeAllowed: false,
+                    fillSpace: true,
                   ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: deck.length,
-                      itemBuilder: (context, index) {
-                        final card = deck[index];
-                        return ListTile(
-                          leading: Image.network(
-                            card.url,
-                            width: 40,
-                            height: 56,
-                            fit: BoxFit.cover,
-                          ),
-                          title: Text(card.name),
-                        );
-                      },
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+              Expanded(
+                child: Card(
+                  child: Column(
+                    children: [
+                      Text("Deck"),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8.0,
+                        ),
+                        child: Column(
+                          children: [
+                            LinearProgressIndicator(
+                              value: deck.length / 99,
+                              minHeight: 8,
+                              backgroundColor: Colors.grey[300],
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.pink,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text('${deck.length} / 99'),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: deck.length,
+                          itemBuilder: (context, index) {
+                            final card = deck[index];
+                            return ListTile(
+                              leading: Image.network(
+                                card.url,
+                                width: 40,
+                                height: 56,
+                                fit: BoxFit.cover,
+                              ),
+                              title: Text(card.name),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
