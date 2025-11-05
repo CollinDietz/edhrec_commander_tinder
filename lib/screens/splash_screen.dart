@@ -27,11 +27,14 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: _textController,
-                decoration: const InputDecoration(
-                  labelText: 'Commander JSON URL',
-                  border: OutlineInputBorder(),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: _textController,
+                  decoration: const InputDecoration(
+                    labelText: 'Commander JSON URL',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),

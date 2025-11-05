@@ -6,6 +6,7 @@ import 'package:edhrec_commander_tinder/widgets/card_image.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'finished_screen.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class DraftScreen extends StatefulWidget {
   const DraftScreen({super.key});
@@ -67,7 +68,7 @@ class _DraftScreenState extends State<DraftScreen> {
 
   Widget _buildDesktopLayout(DeckController deckCtrl, Commander commander) {
     return Scaffold(
-      appBar: AppBar(title: Text('Draft: ${commander.name}')),
+      appBar: AppBar(title: Text('Draft: ${commander.cardInfo.name}')),
       body: Row(
         children: [
           Expanded(child: _buildCommanderCard(commander)),
@@ -90,7 +91,7 @@ class _DraftScreenState extends State<DraftScreen> {
             tooltip: 'Show Commander',
           ),
         ),
-        title: Text('Draft: ${commander.name}'),
+        title: Text('Draft: ${commander.cardInfo.name}'),
       ),
       drawer: _buildCommanderCard(commander),
       endDrawer: SizedBox(
@@ -99,8 +100,8 @@ class _DraftScreenState extends State<DraftScreen> {
       ),
       body: Column(
         children: [
-          Expanded(child: _buildSwipeArea(deckCtrl)),
           _buildDeckSummaryBar(deckCtrl),
+          Expanded(child: _buildSwipeArea(deckCtrl)),
         ],
       ),
     );
@@ -115,7 +116,7 @@ class _DraftScreenState extends State<DraftScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              commander.name,
+              commander.cardInfo.name,
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -123,9 +124,43 @@ class _DraftScreenState extends State<DraftScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            CardImage(url: commander.image_url),
+            _buildCard(commander.cardInfo),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCard(CardInfo card) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CardImage(url: card.image_url),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                'assets/icons/draft.svg',
+                width: 18,
+                height: 18,
+                colorFilter: ColorFilter.mode(
+                  Colors.green[700]!,
+                  BlendMode.srcIn,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '\$${card.price.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -134,37 +169,38 @@ class _DraftScreenState extends State<DraftScreen> {
     if (_engine == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    return Card(
-      margin: const EdgeInsets.all(8),
-      child: SwipeCards(
-        matchEngine: _engine!,
-        itemBuilder: (context, index) {
-          final cached = _resolved[index];
-          if (cached != null) {
-            return Center(child: CardImage(url: cached.image_url));
-          }
-          final future = _items[index].content();
-          return FutureBuilder<CardInfo>(
-            future: future,
-            builder: (context, snap) {
-              if (snap.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snap.hasError) return const Center(child: Text('Error'));
-              if (!snap.hasData) return const Center(child: Text('No data'));
-              _resolved[index] = snap.data;
-              return Center(child: CardImage(url: snap.data!.image_url));
-            },
-          );
-        },
-        onStackFinished: () {
-          if (deckCtrl.deck.length < 99) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('No more cards')));
-          }
-        },
-      ),
+    return SwipeCards(
+      matchEngine: _engine!,
+      itemBuilder: (context, index) {
+        final cached = _resolved[index];
+        if (cached != null) {
+          return Card(child: _buildCard(cached));
+        }
+        final future = _items[index].content();
+        return FutureBuilder<CardInfo>(
+          future: future,
+          builder: (context, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snap.hasError) {
+              return const Center(child: Text('Error'));
+            }
+            if (!snap.hasData) {
+              return const Center(child: Text('No data'));
+            }
+            _resolved[index] = snap.data;
+            return Card(child: _buildCard(snap.data!));
+          },
+        );
+      },
+      onStackFinished: () {
+        if (deckCtrl.deck.length < 99) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('No more cards')));
+        }
+      },
     );
   }
 
@@ -179,14 +215,41 @@ class _DraftScreenState extends State<DraftScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.layers, color: Colors.green[700]),
-                const SizedBox(width: 8),
-                Text(
-                  '${deckCtrl.deck.length} / 99 cards',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Spacer(),
+                      Icon(Icons.layers, color: Colors.green[700]),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${deckCtrl.deck.length} / 99 cards',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      Spacer(),
+                      SvgPicture.asset(
+                        'assets/icons/draft.svg',
+                        width: 18,
+                        height: 18,
+                        colorFilter: ColorFilter.mode(
+                          Colors.green[700]!,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '\$${(deckCtrl.deck.fold<double>(0, (sum, card) => sum + (card.price)) + deckCtrl.commander!.cardInfo.price).toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      Spacer(),
+                    ],
                   ),
                 ),
               ],
@@ -233,34 +296,36 @@ class _DraftScreenState extends State<DraftScreen> {
   }
 
   Widget _buildDeckSummaryBar(DeckController deckCtrl) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      alignment: Alignment.centerLeft,
-      child: Row(
-        children: [
-          Icon(Icons.layers, color: Colors.green[700]),
-          const SizedBox(width: 8),
-          Text('${deckCtrl.deck.length} / 99'),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: LinearProgressIndicator(
-                value: deckCtrl.deck.length / 99,
-                backgroundColor: Colors.grey[300],
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+    return Card(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        alignment: Alignment.centerLeft,
+        child: Row(
+          children: [
+            Icon(Icons.layers, color: Colors.green[700]),
+            const SizedBox(width: 8),
+            Text('${deckCtrl.deck.length} / 99'),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: LinearProgressIndicator(
+                  value: deckCtrl.deck.length / 99,
+                  backgroundColor: Colors.grey[300],
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+                ),
               ),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const FinishedScreen()),
-              );
-            },
-            child: const Text('Finish'),
-          ),
-        ],
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FinishedScreen()),
+                );
+              },
+              child: const Text('Finish'),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -3,17 +3,10 @@ import 'package:edhrec_commander_tinder/models/card_info.dart';
 import 'package:http/http.dart' as http;
 
 class Commander {
-  final String name;
-  final String image_url;
-  final String uuid;
+  final CardInfo cardInfo;
   final List<String> cardJsonUrls;
 
-  Commander({
-    required this.name,
-    required this.uuid,
-    required this.image_url,
-    required this.cardJsonUrls,
-  });
+  Commander({required this.cardInfo, required this.cardJsonUrls});
 
   factory Commander.fromJson(Map<String, dynamic> json) {
     final List<dynamic> cardLists = json['container']['json_dict']['cardlists'];
@@ -25,13 +18,9 @@ class Commander {
       }
     }
 
-    return Commander(
-      name: json['container']['json_dict']['card']['name'] ?? '',
-      uuid: json['container']['json_dict']['card']['id'] ?? '',
-      image_url:
-          json['container']['json_dict']['card']['image_uris'][0]['normal'],
-      cardJsonUrls: urls,
-    );
+    final CardInfo cardInfo = CardInfo.fromJson(json);
+
+    return Commander(cardInfo: cardInfo, cardJsonUrls: urls);
   }
 
   static Future<Commander> fromUrl(String url) async {

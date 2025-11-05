@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
 import 'splash_screen.dart';
@@ -13,11 +14,11 @@ class FinishedScreen extends StatelessWidget {
 
     // Aggregate quantities by UUID
     final Map<String, Map<String, dynamic>> byUuid = {};
-    byUuid[deckCtrl.commander!.uuid] = {
+    byUuid[deckCtrl.commander!.cardInfo.uuid] = {
       'c': 'c', // 'c' for commander, 'm' for main deck
       'f': 0, // format (0 = default sandbox)
       'q': 1, // quantity starts at 1
-      'u': deckCtrl.commander!.uuid, // Archidekt card UUID
+      'u': deckCtrl.commander!.cardInfo.uuid, // Archidekt card UUID
     };
 
     for (int i = 0; i < deckCtrl.deck.length; i++) {
@@ -61,11 +62,40 @@ class FinishedScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'Commander: ${deckCtrl.commander?.name ?? ''}',
+              'Commander: ${deckCtrl.commander?.cardInfo.name ?? ''}',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            Text('Total cards selected: ${deckCtrl.deck.length}'),
+            Icon(Icons.layers, color: Colors.green[700]),
+            const SizedBox(width: 8),
+            Text(
+              '${deckCtrl.deck.length} / 99 cards',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SvgPicture.asset(
+              'assets/icons/draft.svg',
+              width: 18,
+              height: 18,
+              colorFilter: ColorFilter.mode(
+                Colors.green[700]!,
+                BlendMode.srcIn,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '\$${(deckCtrl.deck.fold<double>(0, (sum, card) => sum + (card.price)) + deckCtrl.commander!.cardInfo.price).toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 12),
             const SizedBox(height: 24),
             Wrap(
               spacing: 12,

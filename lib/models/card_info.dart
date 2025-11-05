@@ -7,18 +7,23 @@ class CardInfo {
   final String image_url;
   final String small_image_url;
   final String uuid;
+  final double price;
 
   CardInfo({
     required this.name,
     required this.uuid,
     required this.image_url,
     required this.small_image_url,
+    required this.price,
   });
 
   factory CardInfo.fromJson(Map<String, dynamic> json) {
     return CardInfo(
       name: json['container']['json_dict']['card']['name'] as String,
       uuid: json['container']['json_dict']['card']['id'] as String,
+      price:
+          json['container']['json_dict']['card']['prices']['tcgplayer']['price']
+              as double,
       image_url:
           json['container']['json_dict']['card']['image_uris'][0]['normal']
               as String,
