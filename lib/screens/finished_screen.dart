@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:commander_tinder/controllers/deck_controller.dart';
+import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
 import 'splash_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 

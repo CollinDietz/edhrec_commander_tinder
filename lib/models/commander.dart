@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:commander_tinder/models/card_info.dart';
+import 'package:edhrec_commander_tinder/models/card_info.dart';
 import 'package:http/http.dart' as http;
 
 class Commander {

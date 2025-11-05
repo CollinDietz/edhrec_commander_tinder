@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:commander_tinder/models/commander.dart';
-import 'package:commander_tinder/models/card_info.dart';
+import 'package:edhrec_commander_tinder/models/commander.dart';
+import 'package:edhrec_commander_tinder/models/card_info.dart';
 
 class DeckController extends ChangeNotifier {
   String? _commanderUrl;

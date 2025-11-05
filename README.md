@@ -1,4 +1,4 @@
-# commander_tinder
+# edhrec_commander_tinder
 
 A new Flutter project.
 

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:commander_tinder/controllers/deck_controller.dart';
-import 'package:commander_tinder/widgets/card_image.dart';
+import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
+import 'package:edhrec_commander_tinder/widgets/card_image.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'finished_screen.dart';
-import 'package:commander_tinder/models/card_info.dart';
+import 'package:edhrec_commander_tinder/models/card_info.dart';
 
 class DraftScreen extends StatefulWidget {
   const DraftScreen({super.key});

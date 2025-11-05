@@ -1,6 +1,6 @@
 {
-    "name": "commander_tinder",
-    "short_name": "commander_tinder",
+    "name": "edhrec_commander_tinder",
+    "short_name": "edhrec_commander_tinder",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
