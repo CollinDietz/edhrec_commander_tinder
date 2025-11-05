@@ -5,12 +5,14 @@ import 'package:http/http.dart' as http;
 class CardInfo {
   final String name;
   final String url;
+  final String uuid;
 
-  CardInfo({required this.name, required this.url});
+  CardInfo({required this.name, required this.uuid, required this.url});
 
   factory CardInfo.fromJson(Map<String, dynamic> json) {
     return CardInfo(
       name: json['container']['json_dict']['card']['name'] as String,
+      uuid: json['container']['json_dict']['card']['id'] as String,
       url:
           json['container']['json_dict']['card']['image_uris'][0]['normal']
               as String,

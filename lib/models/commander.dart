@@ -5,10 +5,12 @@ import 'package:http/http.dart' as http;
 class Commander {
   final String name;
   final String image_url;
+  final String uuid;
   final List<String> cardJsonUrls;
 
   Commander({
     required this.name,
+    required this.uuid,
     required this.image_url,
     required this.cardJsonUrls,
   });
@@ -25,6 +27,7 @@ class Commander {
 
     return Commander(
       name: json['container']['json_dict']['card']['name'] ?? '',
+      uuid: json['container']['json_dict']['card']['id'] ?? '',
       image_url:
           json['container']['json_dict']['card']['image_uris'][0]['normal'],
       cardJsonUrls: urls,
