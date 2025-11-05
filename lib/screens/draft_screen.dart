@@ -66,19 +66,30 @@ class _DraftScreenState extends State<DraftScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 8),
-                  Text(
-                    commander.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(width: 12),
+                        Text(
+                          commander.name,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  CardImage(url: commander.image_url),
+                  Center(child: CardImage(url: commander.image_url)),
                 ],
               ),
             ),
           ),
           Expanded(
+            flex: 2,
             child: Card(
               child: _engine == null
                   ? const Center(child: CircularProgressIndicator())
@@ -87,7 +98,9 @@ class _DraftScreenState extends State<DraftScreen> {
                       itemBuilder: (context, index) {
                         final cached = _resolved[index];
                         if (cached != null) {
-                          return CardImage(url: cached.url);
+                          return Center(
+                            child: CardImage(url: cached.image_url),
+                          );
                         }
                         final future = _items[index].content();
                         return FutureBuilder<CardInfo>(
@@ -106,7 +119,9 @@ class _DraftScreenState extends State<DraftScreen> {
                               return const Text('No data');
                             }
                             _resolved[index] = snap.data;
-                            return CardImage(url: snap.data!.url);
+                            return Center(
+                              child: CardImage(url: snap.data!.image_url),
+                            );
                           },
                         );
                       },
@@ -123,11 +138,50 @@ class _DraftScreenState extends State<DraftScreen> {
           Expanded(
             child: Card(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.layers, color: Colors.green[700]),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${deckCtrl.deck.length} / 99 cards',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text(
-                    '${deckCtrl.deck.length} / 99',
-                    style: const TextStyle(fontSize: 16),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: LinearProgressIndicator(
+                      value: deckCtrl.deck.length / 99,
+                      minHeight: 8,
+                      backgroundColor: Colors.grey[300],
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: deckCtrl.deck.length,
+                      itemBuilder: (_, i) => Card(
+                        child: ListTile(
+                          leading: Image.network(
+                            deckCtrl.deck[i].small_image_url,
+                            fit: BoxFit.cover,
+                          ),
+                          title: Text(deckCtrl.deck[i].name),
+                        ),
+                      ),
+                    ),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -139,15 +193,6 @@ class _DraftScreenState extends State<DraftScreen> {
                       );
                     },
                     child: const Text('Finish Early'),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: deckCtrl.deck.length,
-                      itemBuilder: (_, i) => ListTile(
-                        dense: true,
-                        title: Text(deckCtrl.deck[i].name),
-                      ),
-                    ),
                   ),
                 ],
               ),

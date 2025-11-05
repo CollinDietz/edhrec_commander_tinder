@@ -58,7 +58,7 @@ class FinishedScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               'Commander: ${deckCtrl.commander?.name ?? ''}',
@@ -74,7 +74,7 @@ class FinishedScreen extends StatelessWidget {
                   onPressed: deckCtrl.deck.isEmpty
                       ? null
                       : () => _launchUrl(exportUrl),
-                  child: const Text('Open in Archidekt Sandbox'),
+                  child: const Text('Open in Archidekt'),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -90,16 +90,19 @@ class FinishedScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            SelectableText(
-              exportUrl,
-              style: const TextStyle(fontSize: 12, color: Colors.blueGrey),
-            ),
-            const SizedBox(height: 24),
             Expanded(
-              child: ListView.builder(
-                itemCount: deckCtrl.deck.length,
-                itemBuilder: (_, i) =>
-                    ListTile(dense: true, title: Text(deckCtrl.deck[i].name)),
+              child: SizedBox(
+                child: PageView.builder(
+                  itemCount: deckCtrl.deck.length,
+                  controller: PageController(viewportFraction: 0.2),
+                  itemBuilder: (_, i) {
+                    final card = deckCtrl.deck[i];
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.network(card.image_url),
+                    );
+                  },
+                ),
               ),
             ),
           ],
