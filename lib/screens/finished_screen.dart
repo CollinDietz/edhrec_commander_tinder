@@ -94,7 +94,11 @@ class FinishedScreen extends StatelessWidget {
               child: SizedBox(
                 child: PageView.builder(
                   itemCount: deckCtrl.deck.length,
-                  controller: PageController(viewportFraction: 0.2),
+                  controller: PageController(
+                    viewportFraction: MediaQuery.of(context).size.width < 700
+                        ? 0.8
+                        : 0.2,
+                  ),
                   itemBuilder: (_, i) {
                     final card = deckCtrl.deck[i];
                     return Padding(
