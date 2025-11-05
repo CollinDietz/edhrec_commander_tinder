@@ -16,7 +16,12 @@ class DeckController extends ChangeNotifier {
   Object? get loadError => _loadError;
 
   void setCommanderUrl(String url) {
-    _commanderUrl = url.trim();
+    final commanderId = url.trim().replaceFirst(
+      RegExp(r'^https:\/\/edhrec\.com\/commanders\/'),
+      '',
+    );
+    _commanderUrl =
+        'https://json.edhrec.com/pages/commanders/$commanderId.json';
     _commander = null;
     _deck.clear();
     _loadError = null;

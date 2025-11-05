@@ -11,7 +11,9 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final TextEditingController _textController = TextEditingController();
+  final TextEditingController _textController = TextEditingController(
+    text: "https://edhrec.com/commanders/",
+  );
   String? _error;
 
   @override
@@ -43,6 +45,14 @@ class _SplashScreenState extends State<SplashScreen> {
                         final url = _textController.text.trim();
                         if (url.isEmpty) {
                           setState(() => _error = 'Please enter a URL');
+                          return;
+                        }
+
+                        if (!url.startsWith('https://edhrec.com/commanders/')) {
+                          setState(
+                            () => _error =
+                                'URL must start with https://edhrec.com/commanders/',
+                          );
                           return;
                         }
                         setState(() => _error = null);
