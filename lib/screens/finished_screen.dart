@@ -95,7 +95,7 @@ class FinishedScreen extends StatelessWidget {
                 child: PageView.builder(
                   itemCount: deckCtrl.deck.length,
                   controller: PageController(
-                    viewportFraction: MediaQuery.of(context).size.width < 700
+                    viewportFraction: MediaQuery.of(context).size.width < 900
                         ? 0.8
                         : 0.2,
                   ),

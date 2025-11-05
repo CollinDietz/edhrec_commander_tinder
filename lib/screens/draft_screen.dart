@@ -59,7 +59,7 @@ class _DraftScreenState extends State<DraftScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     final width = MediaQuery.of(context).size.width;
-    final isMobile = width < 700; // breakpoint
+    final isMobile = width < 900; // breakpoint
     return isMobile
         ? _buildMobileLayout(deckCtrl, commander)
         : _buildDesktopLayout(deckCtrl, commander);
