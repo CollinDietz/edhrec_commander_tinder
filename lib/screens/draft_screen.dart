@@ -315,6 +315,20 @@ class _DraftScreenState extends State<DraftScreen> {
                 ),
               ),
             ),
+            SvgPicture.asset(
+              'assets/icons/draft.svg',
+              width: 18,
+              height: 18,
+              colorFilter: ColorFilter.mode(
+                Colors.green[700]!,
+                BlendMode.srcIn,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '\$${(deckCtrl.deck.fold<double>(0, (sum, card) => sum + (card.price)) + deckCtrl.commander!.cardInfo.price).toStringAsFixed(2)}',
+            ),
+            const SizedBox(width: 8),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushReplacement(
