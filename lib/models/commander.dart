@@ -5,20 +5,40 @@ import 'package:http/http.dart' as http;
 class Commander {
   final CardInfo cardInfo;
   final List<String> cardJsonUrls;
+  final List<String> basicsUrls;
 
-  Commander({required this.cardInfo, required this.cardJsonUrls});
+  static const List<String> basics = [
+    "c44f81ca-f72f-445c-8901-3a894a2a47f9", // Mountain
+    "4069fb4a-8ee1-41ef-ab93-39a8cc58e0e5", // Plains
+    "a2e22347-f0cb-4cfd-88a3-4f46a16e4946", // Island
+    "f0b234d8-d6bb-48ec-8a4d-d8a570a69c62", // Swamp
+    "a305e44f-4253-4754-b83f-1e34103d77b0", // Forest
+  ];
+
+  Commander({
+    required this.cardInfo,
+    required this.cardJsonUrls,
+    required this.basicsUrls,
+  });
 
   factory Commander.fromJson(Map<String, dynamic> json) {
     final List<dynamic> cardLists = json['container']['json_dict']['cardlists'];
 
     final List<MapEntry<String, double>> urlWithNumber = [];
+    final List<String> basicsUrl = [];
     for (final Map<String, dynamic> cardList in cardLists) {
       for (final Map<String, dynamic> card in cardList['cardviews']) {
         final String url = 'https://json.edhrec.com/pages${card['url']}.json';
+        final String id = card['id'];
 
         final num inclusion = card['inclusion'] as num;
         final num potentialDecks = card['potential_decks'] as num;
-        urlWithNumber.add(MapEntry(url, inclusion / potentialDecks));
+
+        if (basics.contains(id)) {
+          basicsUrl.add(url);
+        } else {
+          urlWithNumber.add(MapEntry(url, inclusion / potentialDecks));
+        }
       }
     }
 
@@ -28,7 +48,11 @@ class Commander {
 
     final CardInfo cardInfo = CardInfo.fromJson(json);
 
-    return Commander(cardInfo: cardInfo, cardJsonUrls: urls);
+    return Commander(
+      cardInfo: cardInfo,
+      cardJsonUrls: urls,
+      basicsUrls: basicsUrl,
+    );
   }
 
   static Future<Commander> fromUrl(String url) async {
@@ -39,6 +63,10 @@ class Commander {
     }
     final jsonData = json.decode(response.body);
     return Commander.fromJson(jsonData);
+  }
+
+  List<Future<CardInfo>> getBasics() {
+    return basicsUrls.map((url) => CardInfo.fromUrl(url)).toList();
   }
 
   Future<CardInfo> getCard(int index) {

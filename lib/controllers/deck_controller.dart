@@ -6,12 +6,14 @@ class DeckController extends ChangeNotifier {
   String? _commanderUrl;
   Commander? _commander;
   final List<CardInfo> _deck = [];
+  final List<CardInfo> _basics = [];
   bool _loadingCommander = false;
   Object? _loadError;
 
   String? get commanderUrl => _commanderUrl;
   Commander? get commander => _commander;
   List<CardInfo> get deck => List.unmodifiable(_deck);
+  List<CardInfo> get basics => List.unmodifiable(_basics);
   bool get loadingCommander => _loadingCommander;
   Object? get loadError => _loadError;
 
@@ -36,6 +38,20 @@ class DeckController extends ChangeNotifier {
     notifyListeners();
     try {
       _commander = await Commander.fromUrl(url);
+      _basics.clear();
+      final currentCommander = _commander;
+      final urls = currentCommander?.basicsUrls ?? const [];
+      for (final u in urls) {
+        CardInfo.fromUrl(u)
+            .then((card) {
+              if (!identical(currentCommander, _commander)) return;
+              _basics.add(card);
+              notifyListeners();
+            })
+            .catchError((_) {
+              // Ignore individual basic load errors.
+            });
+      }
     } catch (e) {
       _loadError = e;
     } finally {

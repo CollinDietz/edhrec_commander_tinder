@@ -36,6 +36,21 @@ class FinishedScreen extends StatelessWidget {
       }
     }
 
+    for (int i = 0; i < deckCtrl.basics.length; i++) {
+      final card = deckCtrl.basics[i];
+      final uuid = card.uuid; // CardInfo.uuid assumed non-null & non-empty
+      if (byUuid.containsKey(uuid)) {
+        byUuid[uuid]!['q'] = (byUuid[uuid]!['q'] as int) + 1;
+      } else {
+        byUuid[uuid] = {
+          'c': 'm', // 'c' for commander, 'm' for main deck
+          'f': 0, // format (0 = default sandbox)
+          'q': 1, // quantity starts at 1
+          'u': uuid, // Archidekt card UUID
+        };
+      }
+    }
+
     final cards = byUuid.values.toList();
     final json = jsonEncode(cards); // Proper JSON with quoted keys/values
     final encoded = Uri.encodeComponent(json);
@@ -69,7 +84,7 @@ class FinishedScreen extends StatelessWidget {
             Icon(Icons.layers, color: Colors.green[700]),
             const SizedBox(width: 8),
             Text(
-              '${deckCtrl.deck.length} / 99 cards',
+              '${(deckCtrl.deck.length + deckCtrl.basics.length)} / 99 cards',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -123,14 +138,17 @@ class FinishedScreen extends StatelessWidget {
             Expanded(
               child: SizedBox(
                 child: PageView.builder(
-                  itemCount: deckCtrl.deck.length,
+                  itemCount: deckCtrl.deck.length + deckCtrl.basics.length,
                   controller: PageController(
                     viewportFraction: MediaQuery.of(context).size.width < 900
                         ? 0.8
                         : 0.2,
                   ),
                   itemBuilder: (_, i) {
-                    final card = deckCtrl.deck[i];
+                    final isDeck = i < deckCtrl.deck.length;
+                    final card = isDeck
+                        ? deckCtrl.deck[i]
+                        : deckCtrl.basics[i - deckCtrl.deck.length];
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Image.network(card.image_url),

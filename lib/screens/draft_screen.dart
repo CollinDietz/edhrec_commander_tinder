@@ -38,7 +38,8 @@ class _DraftScreenState extends State<DraftScreen> {
           likeAction: () {
             _futures[i]?.then((c) {
               deckCtrl.addCard(c);
-              if (deckCtrl.deck.length == 99 && mounted) {
+              if ((deckCtrl.deck.length + deckCtrl.basics.length) == 99 &&
+                  mounted) {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => const FinishedScreen()),
@@ -195,7 +196,7 @@ class _DraftScreenState extends State<DraftScreen> {
         );
       },
       onStackFinished: () {
-        if (deckCtrl.deck.length < 99) {
+        if ((deckCtrl.deck.length + deckCtrl.basics.length) < 99) {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(const SnackBar(content: Text('No more cards')));
@@ -222,7 +223,7 @@ class _DraftScreenState extends State<DraftScreen> {
                       Icon(Icons.layers, color: Colors.green[700]),
                       const SizedBox(width: 8),
                       Text(
-                        '${deckCtrl.deck.length} / 99 cards',
+                        '${(deckCtrl.deck.length + deckCtrl.basics.length)} / 99 cards',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -258,7 +259,7 @@ class _DraftScreenState extends State<DraftScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: LinearProgressIndicator(
-              value: deckCtrl.deck.length / 99,
+              value: (deckCtrl.deck.length + deckCtrl.basics.length) / 99,
               minHeight: 8,
               backgroundColor: Colors.grey[300],
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
@@ -266,16 +267,38 @@ class _DraftScreenState extends State<DraftScreen> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: deckCtrl.deck.length,
-              itemBuilder: (_, i) => Card(
-                child: ListTile(
-                  leading: Image.network(
-                    deckCtrl.deck[i].small_image_url,
-                    fit: BoxFit.cover,
+              itemCount: deckCtrl.basics.length + deckCtrl.deck.length,
+              itemBuilder: (_, i) {
+                final isBasic = i < deckCtrl.basics.length;
+                final card = isBasic
+                    ? deckCtrl.basics[i]
+                    : deckCtrl.deck[i - deckCtrl.basics.length];
+                if (isBasic) {
+                  return Card(
+                    color: Colors.green[50],
+                    child: ListTile(
+                      leading: Image.network(
+                        card.small_image_url,
+                        fit: BoxFit.cover,
+                      ),
+                      title: Text(
+                        card.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      trailing: const Icon(Icons.grass, color: Colors.green),
+                    ),
+                  );
+                }
+                return Card(
+                  child: ListTile(
+                    leading: Image.network(
+                      card.small_image_url,
+                      fit: BoxFit.cover,
+                    ),
+                    title: Text(card.name),
                   ),
-                  title: Text(deckCtrl.deck[i].name),
-                ),
-              ),
+                );
+              },
             ),
           ),
           Padding(
@@ -304,12 +327,12 @@ class _DraftScreenState extends State<DraftScreen> {
           children: [
             Icon(Icons.layers, color: Colors.green[700]),
             const SizedBox(width: 8),
-            Text('${deckCtrl.deck.length} / 99'),
+            Text('${(deckCtrl.deck.length + deckCtrl.basics.length)} / 99'),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: LinearProgressIndicator(
-                  value: deckCtrl.deck.length / 99,
+                  value: (deckCtrl.deck.length + deckCtrl.basics.length) / 99,
                   backgroundColor: Colors.grey[300],
                   valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
                 ),
