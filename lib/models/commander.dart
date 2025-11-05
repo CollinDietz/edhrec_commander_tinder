@@ -11,12 +11,20 @@ class Commander {
   factory Commander.fromJson(Map<String, dynamic> json) {
     final List<dynamic> cardLists = json['container']['json_dict']['cardlists'];
 
-    List<String> urls = [];
-    for (Map<String, dynamic> cardList in cardLists) {
-      for (Map<String, dynamic> card in cardList['cardviews']) {
-        urls.add('https://json.edhrec.com/pages${card['url']}.json');
+    final List<MapEntry<String, double>> urlWithNumber = [];
+    for (final Map<String, dynamic> cardList in cardLists) {
+      for (final Map<String, dynamic> card in cardList['cardviews']) {
+        final String url = 'https://json.edhrec.com/pages${card['url']}.json';
+
+        final num inclusion = card['inclusion'] as num;
+        final num potentialDecks = card['potential_decks'] as num;
+        urlWithNumber.add(MapEntry(url, inclusion / potentialDecks));
       }
     }
+
+    urlWithNumber.sort((a, b) => b.value.compareTo(a.value));
+
+    final List<String> urls = urlWithNumber.map((e) => e.key).toList();
 
     final CardInfo cardInfo = CardInfo.fromJson(json);
 
