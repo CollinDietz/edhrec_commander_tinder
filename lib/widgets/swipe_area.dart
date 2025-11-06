@@ -10,6 +10,7 @@ class SwipeArea extends StatelessWidget {
   final List<CardInfo?> resolved;
   final DeckController deckCtrl;
   final int basicsLength;
+  final ValueChanged<int>? onResolved; // callback when a card resolves
   const SwipeArea({
     super.key,
     required this.engine,
@@ -17,6 +18,7 @@ class SwipeArea extends StatelessWidget {
     required this.resolved,
     required this.deckCtrl,
     required this.basicsLength,
+    this.onResolved,
   });
 
   @override
@@ -29,9 +31,7 @@ class SwipeArea extends StatelessWidget {
       itemBuilder: (context, index) {
         final cached = resolved[index];
         if (cached != null) {
-          return Card(
-            child: Center(child: CardDisplay(card: cached)),
-          );
+          return _displayCard(cached);
         }
         final future = items[index].content();
         return FutureBuilder<CardInfo>(
@@ -46,10 +46,11 @@ class SwipeArea extends StatelessWidget {
             if (!snap.hasData) {
               return const Center(child: Text('No data'));
             }
-            resolved[index] = snap.data;
-            return Card(
-              child: Center(child: CardDisplay(card: snap.data!)),
-            );
+            if (resolved[index] == null) {
+              resolved[index] = snap.data;
+              onResolved?.call(index); // notify parent to allow UI refresh
+            }
+            return _displayCard(resolved[index]!);
           },
         );
       },
@@ -62,4 +63,7 @@ class SwipeArea extends StatelessWidget {
       },
     );
   }
+
+  Widget _displayCard(CardInfo cached) =>
+      Center(child: CardDisplay(card: cached));
 }

@@ -8,7 +8,7 @@ import 'package:edhrec_commander_tinder/models/card_info.dart';
 import 'package:edhrec_commander_tinder/widgets/commander_card.dart';
 import 'package:edhrec_commander_tinder/widgets/swipe_area.dart';
 import 'package:edhrec_commander_tinder/widgets/deck_panel.dart';
-import 'package:edhrec_commander_tinder/widgets/draft_progress_footer.dart';
+import 'package:edhrec_commander_tinder/widgets/draft_progress_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class DraftScreen extends StatefulWidget {
@@ -75,7 +75,7 @@ class _DraftScreenState extends State<DraftScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     final width = MediaQuery.of(context).size.width;
-    final isMobile = width < 900; // breakpoint
+    final isMobile = width < 900;
     return isMobile
         ? _buildMobileLayout(deckCtrl, commander)
         : _buildDesktopLayout(deckCtrl, commander);
@@ -98,6 +98,13 @@ class _DraftScreenState extends State<DraftScreen> {
                     resolved: _resolved,
                     deckCtrl: deckCtrl,
                     basicsLength: deckCtrl.basics.length,
+                    onResolved: (i) {
+                      if (mounted && i == _currentIndex) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) setState(() {});
+                        });
+                      }
+                    },
                   ),
                 ),
                 _buildPriceBar(),
@@ -169,6 +176,7 @@ class _DraftScreenState extends State<DraftScreen> {
         // Draft swipe view
         return Column(
           children: [
+            const DraftProgressBar(),
             Expanded(
               child: SwipeArea(
                 engine: _engine,
@@ -176,10 +184,16 @@ class _DraftScreenState extends State<DraftScreen> {
                 resolved: _resolved,
                 deckCtrl: deckCtrl,
                 basicsLength: deckCtrl.basics.length,
+                onResolved: (i) {
+                  if (mounted && i == _currentIndex) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) setState(() {});
+                    });
+                  }
+                },
               ),
             ),
             _buildPriceBar(),
-            const DraftProgressFooter(),
           ],
         );
     }
