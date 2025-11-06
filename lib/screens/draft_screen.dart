@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
 import 'package:edhrec_commander_tinder/models/commander.dart';
-import 'package:edhrec_commander_tinder/widgets/card_image.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'finished_screen.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
+import 'package:edhrec_commander_tinder/widgets/commander_card.dart';
+import 'package:edhrec_commander_tinder/widgets/swipe_area.dart';
+import 'package:edhrec_commander_tinder/widgets/deck_panel.dart';
+import 'package:edhrec_commander_tinder/widgets/draft_progress_footer.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class DraftScreen extends StatefulWidget {
@@ -20,6 +23,8 @@ class _DraftScreenState extends State<DraftScreen> {
   List<SwipeItem> _items = [];
   List<Future<CardInfo>?> _futures = [];
   List<CardInfo?> _resolved = [];
+  int _mobileTab = 0; // 0 = draft, 1 = commander, 2 = deck
+  int _currentIndex = 0; // tracks active swipe card index
 
   @override
   void didChangeDependencies() {
@@ -45,7 +50,16 @@ class _DraftScreenState extends State<DraftScreen> {
                   MaterialPageRoute(builder: (_) => const FinishedScreen()),
                 );
               }
+              if (mounted && _currentIndex == i) {
+                setState(() => _currentIndex++);
+              }
             });
+          },
+          nopeAction: () {
+            // Advance index on dislike/pass
+            if (mounted && _currentIndex == i) {
+              setState(() => _currentIndex++);
+            }
           },
         );
       });
@@ -72,298 +86,175 @@ class _DraftScreenState extends State<DraftScreen> {
       appBar: AppBar(title: Text('Draft: ${commander.cardInfo.name}')),
       body: Row(
         children: [
-          Expanded(child: _buildCommanderCard(commander)),
-          Expanded(flex: 2, child: _buildSwipeArea(deckCtrl)),
-          Expanded(child: _buildDeckPanel(deckCtrl)),
+          const Expanded(child: CommanderCardPlaceholder()),
+          Expanded(
+            flex: 2,
+            child: Column(
+              children: [
+                Expanded(
+                  child: SwipeArea(
+                    engine: _engine,
+                    items: _items,
+                    resolved: _resolved,
+                    deckCtrl: deckCtrl,
+                    basicsLength: deckCtrl.basics.length,
+                  ),
+                ),
+                _buildPriceBar(),
+              ],
+            ),
+          ),
+          const Expanded(child: DeckPanel()),
         ],
       ),
     );
   }
 
   Widget _buildMobileLayout(DeckController deckCtrl, Commander commander) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Builder(
-          builder: (context) => IconButton(
-            // Replace the icon below with any Material icon you prefer
-            // or swap with a CircleAvatar to show the commander art.
-            icon: const Icon(Icons.shield),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-            tooltip: 'Show Commander',
-          ),
-        ),
-        title: Text('Draft: ${commander.cardInfo.name}'),
-      ),
-      drawer: _buildCommanderCard(commander),
-      endDrawer: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.75,
-        child: _buildDeckPanel(deckCtrl),
-      ),
-      body: Column(
-        children: [
-          _buildDeckSummaryBar(deckCtrl),
-          Expanded(child: _buildSwipeArea(deckCtrl)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCommanderCard(Commander commander) {
-    return Card(
-      margin: const EdgeInsets.all(8),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              commander.cardInfo.name,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.1,
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildCard(commander.cardInfo),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCard(CardInfo card) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CardImage(url: card.image_url),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset(
-                'assets/icons/draft.svg',
-                width: 18,
-                height: 18,
-                colorFilter: ColorFilter.mode(
-                  Colors.green[700]!,
-                  BlendMode.srcIn,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '\$${card.price.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSwipeArea(DeckController deckCtrl) {
-    if (_engine == null) {
-      return const Center(child: CircularProgressIndicator());
+    String title;
+    switch (_mobileTab) {
+      case 1:
+        title = 'Commander';
+        break;
+      case 2:
+        title = 'Deck (${deckCtrl.deck.length + deckCtrl.basics.length}/99)';
+        break;
+      default:
+        title = 'Draft: ${commander.cardInfo.name}';
     }
-    return SwipeCards(
-      matchEngine: _engine!,
-      itemBuilder: (context, index) {
-        final cached = _resolved[index];
-        if (cached != null) {
-          return Card(child: _buildCard(cached));
-        }
-        final future = _items[index].content();
-        return FutureBuilder<CardInfo>(
-          future: future,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snap.hasError) {
-              return const Center(child: Text('Error'));
-            }
-            if (!snap.hasData) {
-              return const Center(child: Text('No data'));
-            }
-            _resolved[index] = snap.data;
-            return Card(child: _buildCard(snap.data!));
-          },
-        );
-      },
-      onStackFinished: () {
-        if ((deckCtrl.deck.length + deckCtrl.basics.length) < 99) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('No more cards')));
-        }
-      },
-    );
-  }
-
-  Widget _buildDeckPanel(DeckController deckCtrl) {
-    return Card(
-      margin: const EdgeInsets.all(8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Spacer(),
-                      Icon(Icons.layers, color: Colors.green[700]),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${(deckCtrl.deck.length + deckCtrl.basics.length)} / 99 cards',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      Spacer(),
-                      SvgPicture.asset(
-                        'assets/icons/draft.svg',
-                        width: 18,
-                        height: 18,
-                        colorFilter: ColorFilter.mode(
-                          Colors.green[700]!,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '\$${(deckCtrl.deck.fold<double>(0, (sum, card) => sum + (card.price)) + deckCtrl.commander!.cardInfo.price).toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      Spacer(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: LinearProgressIndicator(
-              value: (deckCtrl.deck.length + deckCtrl.basics.length) / 99,
-              minHeight: 8,
-              backgroundColor: Colors.grey[300],
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: deckCtrl.basics.length + deckCtrl.deck.length,
-              itemBuilder: (_, i) {
-                final isBasic = i < deckCtrl.basics.length;
-                final card = isBasic
-                    ? deckCtrl.basics[i]
-                    : deckCtrl.deck[i - deckCtrl.basics.length];
-                if (isBasic) {
-                  return Card(
-                    color: Colors.green[50],
-                    child: ListTile(
-                      leading: Image.network(
-                        card.small_image_url,
-                        fit: BoxFit.cover,
-                      ),
-                      title: Text(
-                        card.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      trailing: const Icon(Icons.grass, color: Colors.green),
-                    ),
-                  );
-                }
-                return Card(
-                  child: ListTile(
-                    leading: Image.network(
-                      card.small_image_url,
-                      fit: BoxFit.cover,
-                    ),
-                    title: Text(card.name),
-                  ),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const FinishedScreen()),
-                );
-              },
-              child: const Text('Finish Early'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDeckSummaryBar(DeckController deckCtrl) {
-    return Card(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        alignment: Alignment.centerLeft,
-        child: Row(
-          children: [
-            Icon(Icons.layers, color: Colors.green[700]),
-            const SizedBox(width: 8),
-            Text('${(deckCtrl.deck.length + deckCtrl.basics.length)} / 99'),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: LinearProgressIndicator(
-                  value: (deckCtrl.deck.length + deckCtrl.basics.length) / 99,
-                  backgroundColor: Colors.grey[300],
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-                ),
-              ),
-            ),
-            SvgPicture.asset(
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: _buildMobileContent(deckCtrl, commander),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _mobileTab,
+        onTap: (i) => setState(() => _mobileTab = i),
+        items: [
+          BottomNavigationBarItem(
+            icon: SvgPicture.asset(
               'assets/icons/draft.svg',
-              width: 18,
-              height: 18,
+              width: 24,
+              height: 24,
               colorFilter: ColorFilter.mode(
-                Colors.green[700]!,
+                Theme.of(context).colorScheme.onSurface,
                 BlendMode.srcIn,
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              '\$${(deckCtrl.deck.fold<double>(0, (sum, card) => sum + (card.price)) + deckCtrl.commander!.cardInfo.price).toStringAsFixed(2)}',
-            ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const FinishedScreen()),
-                );
-              },
-              child: const Text('Finish'),
-            ),
-          ],
-        ),
+            label: 'Draft',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.shield),
+            label: 'Commander',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.layers),
+            label: 'Deck',
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildMobileContent(DeckController deckCtrl, Commander commander) {
+    switch (_mobileTab) {
+      case 1:
+        // Commander view
+        return const SingleChildScrollView(
+          padding: EdgeInsets.all(12),
+          child: CommanderCardPlaceholder(),
+        );
+      case 2:
+        // Deck list view
+        return const DeckPanel();
+      default:
+        // Draft swipe view
+        return Column(
+          children: [
+            Expanded(
+              child: SwipeArea(
+                engine: _engine,
+                items: _items,
+                resolved: _resolved,
+                deckCtrl: deckCtrl,
+                basicsLength: deckCtrl.basics.length,
+              ),
+            ),
+            _buildPriceBar(),
+            const DraftProgressFooter(),
+          ],
+        );
+    }
+  }
+}
+
+// CommanderCard extracted; placeholder wrapper to keep Expanded usage simple.
+class CommanderCardPlaceholder extends StatelessWidget {
+  const CommanderCardPlaceholder({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final deckCtrl = context.watch<DeckController>();
+    final commander = deckCtrl.commander;
+    if (commander == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return CommanderCard(commander: commander);
+  }
+}
+
+/// Static bar showing price of current card being swiped.
+extension _PriceLookup on _DraftScreenState {
+  Widget _buildPriceBar() {
+    context
+        .watch<
+          DeckController
+        >(); // watch to rebuild when deck changes (index advances)
+    if (_currentIndex >= _items.length) {
+      return Container(
+        height: 48,
+        alignment: Alignment.center,
+        child: const Text(
+          'Done',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+      );
+    }
+    final resolved = _resolved[_currentIndex];
+    Widget inner;
+    if (resolved != null) {
+      inner = Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.attach_money, color: Colors.green),
+          Text(
+            resolved.price.toStringAsFixed(2),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(width: 24),
+          Text(
+            'Card ${_currentIndex + 1}/${_items.length}',
+            style: const TextStyle(fontSize: 14, color: Colors.black54),
+          ),
+        ],
+      );
+    } else {
+      // Ensure future started so price resolves soon
+      _futures[_currentIndex] ??= context
+          .read<DeckController>()
+          .commander!
+          .getCard(_currentIndex);
+      inner = const SizedBox(
+        height: 20,
+        width: 20,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        border: Border(top: BorderSide(color: Colors.grey[300]!)),
+      ),
+      child: Center(child: inner),
     );
   }
 }
