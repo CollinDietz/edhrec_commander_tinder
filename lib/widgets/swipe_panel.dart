@@ -32,7 +32,6 @@ class SwipePanel extends StatelessWidget {
     final deckCtrl = context.watch<DeckController>();
     return Column(
       children: [
-        const DraftProgressBar(),
         Expanded(
           child: SwipeArea(
             engine: engine,
@@ -50,6 +49,7 @@ class SwipePanel extends StatelessWidget {
             },
           ),
         ),
+        // Text(engine.currentItem.content)
         PriceBar(
           currentIndex: currentIndex,
           total: items.length,

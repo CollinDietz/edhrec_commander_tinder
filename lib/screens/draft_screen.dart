@@ -1,3 +1,4 @@
+import 'package:edhrec_commander_tinder/widgets/draft_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
@@ -8,7 +9,7 @@ import 'package:edhrec_commander_tinder/models/card_info.dart';
 import 'package:edhrec_commander_tinder/widgets/commander_card.dart';
 import 'package:edhrec_commander_tinder/widgets/deck_panel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:edhrec_commander_tinder/widgets/SwipePanel.dart';
+import 'package:edhrec_commander_tinder/widgets/swipe_panel.dart';
 
 class DraftScreen extends StatefulWidget {
   const DraftScreen({super.key});
@@ -89,7 +90,6 @@ class _DraftScreenState extends State<DraftScreen> {
           Expanded(
             flex: 2,
             child: SwipePanel(
-              showProgressBar: false,
               engine: _engine,
               items: _items,
               resolved: _resolved,
@@ -120,7 +120,12 @@ class _DraftScreenState extends State<DraftScreen> {
         title = 'Draft: ${commander.cardInfo.name}';
     }
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(0),
+          child: DraftProgressBar(),
+        ),
+      ),
       body: _buildMobileContent(deckCtrl, commander),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _mobileTab,

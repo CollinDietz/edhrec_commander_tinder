@@ -38,11 +38,11 @@ class DraftProgressBar extends StatelessWidget {
         children: [
           CountLabel(totalCount: totalCount),
           const SizedBox(width: 16),
-          DeckProgressIndicator(progress: progress),
+          Expanded(child: DeckProgressIndicator(progress: progress)),
           const SizedBox(width: 16),
           CostLabel(cost: cost),
           const SizedBox(width: 16),
-          FinishButton(enabled: totalCount > 0),
+          FinishButton(),
         ],
       ),
     );

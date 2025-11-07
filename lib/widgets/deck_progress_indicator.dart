@@ -6,15 +6,14 @@ class DeckProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(4),
-        child: LinearProgressIndicator(
-          value: progress.clamp(0, 1),
-          backgroundColor: Colors.grey[300],
-          valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-          semanticsLabel: 'Deck completion progress',
-        ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(4),
+      child: LinearProgressIndicator(
+        minHeight: 8,
+        value: progress.clamp(0, 1),
+        backgroundColor: Colors.grey[300],
+        valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+        semanticsLabel: 'Deck completion progress',
       ),
     );
   }

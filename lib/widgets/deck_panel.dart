@@ -1,3 +1,8 @@
+import 'package:edhrec_commander_tinder/widgets/cost_label.dart';
+import 'package:edhrec_commander_tinder/widgets/count_label.dart';
+import 'package:edhrec_commander_tinder/widgets/deck_progress_indicator.dart';
+import 'package:edhrec_commander_tinder/widgets/draft_progress_bar.dart';
+import 'package:edhrec_commander_tinder/widgets/finish_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -13,60 +18,6 @@ class DeckPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    const Spacer(),
-                    Icon(Icons.layers, color: Colors.green[700]),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${(deckCtrl.deck.length + deckCtrl.basics.length)} / 99 cards',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const Spacer(),
-                    SvgPicture.asset(
-                      'assets/icons/draft.svg',
-                      width: 18,
-                      height: 18,
-                      colorFilter: ColorFilter.mode(
-                        Colors.green[700]!,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '\$${(deckCtrl.deck.fold<double>(0, (sum, card) => sum + (card.price)) + deckCtrl.commander!.cardInfo.price).toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const Spacer(),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: LinearProgressIndicator(
-            value: (deckCtrl.deck.length + deckCtrl.basics.length) / 99,
-            minHeight: 8,
-            backgroundColor: Colors.grey[300],
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-          ),
-        ),
         Expanded(
           child: ListView.builder(
             itemCount: deckCtrl.basics.length + deckCtrl.deck.length,
@@ -101,18 +52,6 @@ class DeckPanel extends StatelessWidget {
                 ),
               );
             },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const FinishedScreen()),
-              );
-            },
-            child: const Text('Finish Early'),
           ),
         ),
       ],
