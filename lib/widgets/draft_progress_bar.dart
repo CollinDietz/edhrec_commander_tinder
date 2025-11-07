@@ -34,10 +34,6 @@ class DraftProgressBar extends StatelessWidget {
     return Container(
       height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        border: Border(top: BorderSide(color: Colors.grey[300]!)),
-      ),
       child: Row(
         children: [
           CountLabel(totalCount: totalCount),

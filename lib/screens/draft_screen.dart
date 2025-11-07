@@ -6,10 +6,9 @@ import 'package:swipe_cards/swipe_cards.dart';
 import 'finished_screen.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
 import 'package:edhrec_commander_tinder/widgets/commander_card.dart';
-import 'package:edhrec_commander_tinder/widgets/swipe_area.dart';
 import 'package:edhrec_commander_tinder/widgets/deck_panel.dart';
-import 'package:edhrec_commander_tinder/widgets/draft_progress_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:edhrec_commander_tinder/widgets/SwipePanel.dart';
 
 class DraftScreen extends StatefulWidget {
   const DraftScreen({super.key});
@@ -86,29 +85,20 @@ class _DraftScreenState extends State<DraftScreen> {
       appBar: AppBar(title: Text('Draft: ${commander.cardInfo.name}')),
       body: Row(
         children: [
-          const Expanded(child: CommanderCardPlaceholder()),
+          const Expanded(child: CommanderCardPanel()),
           Expanded(
             flex: 2,
-            child: Column(
-              children: [
-                Expanded(
-                  child: SwipeArea(
-                    engine: _engine,
-                    items: _items,
-                    resolved: _resolved,
-                    deckCtrl: deckCtrl,
-                    basicsLength: deckCtrl.basics.length,
-                    onResolved: (i) {
-                      if (mounted && i == _currentIndex) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted) setState(() {});
-                        });
-                      }
-                    },
-                  ),
-                ),
-                _buildPriceBar(),
-              ],
+            child: SwipePanel(
+              showProgressBar: false,
+              engine: _engine,
+              items: _items,
+              resolved: _resolved,
+              futures: _futures,
+              currentIndex: _currentIndex,
+              basicsLength: deckCtrl.basics.length,
+              onCardResolved: (i) {
+                if (mounted) setState(() {});
+              },
             ),
           ),
           const Expanded(child: DeckPanel()),
@@ -165,44 +155,30 @@ class _DraftScreenState extends State<DraftScreen> {
     switch (_mobileTab) {
       case 1:
         // Commander view
-        return const SingleChildScrollView(
-          padding: EdgeInsets.all(12),
-          child: CommanderCardPlaceholder(),
-        );
+        return CommanderCardPanel();
       case 2:
         // Deck list view
         return const DeckPanel();
       default:
         // Draft swipe view
-        return Column(
-          children: [
-            const DraftProgressBar(),
-            Expanded(
-              child: SwipeArea(
-                engine: _engine,
-                items: _items,
-                resolved: _resolved,
-                deckCtrl: deckCtrl,
-                basicsLength: deckCtrl.basics.length,
-                onResolved: (i) {
-                  if (mounted && i == _currentIndex) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (mounted) setState(() {});
-                    });
-                  }
-                },
-              ),
-            ),
-            _buildPriceBar(),
-          ],
+        return SwipePanel(
+          engine: _engine,
+          items: _items,
+          resolved: _resolved,
+          futures: _futures,
+          currentIndex: _currentIndex,
+          basicsLength: deckCtrl.basics.length,
+          onCardResolved: (i) {
+            if (mounted) setState(() {});
+          },
         );
     }
   }
 }
 
 // CommanderCard extracted; placeholder wrapper to keep Expanded usage simple.
-class CommanderCardPlaceholder extends StatelessWidget {
-  const CommanderCardPlaceholder({super.key});
+class CommanderCardPanel extends StatelessWidget {
+  const CommanderCardPanel({super.key});
   @override
   Widget build(BuildContext context) {
     final deckCtrl = context.watch<DeckController>();
@@ -214,61 +190,4 @@ class CommanderCardPlaceholder extends StatelessWidget {
   }
 }
 
-/// Static bar showing price of current card being swiped.
-extension _PriceLookup on _DraftScreenState {
-  Widget _buildPriceBar() {
-    context
-        .watch<
-          DeckController
-        >(); // watch to rebuild when deck changes (index advances)
-    if (_currentIndex >= _items.length) {
-      return Container(
-        height: 48,
-        alignment: Alignment.center,
-        child: const Text(
-          'Done',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-      );
-    }
-    final resolved = _resolved[_currentIndex];
-    Widget inner;
-    if (resolved != null) {
-      inner = Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.attach_money, color: Colors.green),
-          Text(
-            resolved.price.toStringAsFixed(2),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(width: 24),
-          Text(
-            'Card ${_currentIndex + 1}/${_items.length}',
-            style: const TextStyle(fontSize: 14, color: Colors.black54),
-          ),
-        ],
-      );
-    } else {
-      // Ensure future started so price resolves soon
-      _futures[_currentIndex] ??= context
-          .read<DeckController>()
-          .commander!
-          .getCard(_currentIndex);
-      inner = const SizedBox(
-        height: 20,
-        width: 20,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      );
-    }
-    return Container(
-      height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        border: Border(top: BorderSide(color: Colors.grey[300]!)),
-      ),
-      child: Center(child: inner),
-    );
-  }
-}
+// (Price bar logic moved to widgets/price_bar.dart)
