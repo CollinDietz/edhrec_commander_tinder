@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
+import 'card_popup.dart';
 
 class DeckPanel extends StatelessWidget {
   const DeckPanel({super.key});
@@ -19,29 +20,29 @@ class DeckPanel extends StatelessWidget {
               final card = isBasic
                   ? deckCtrl.basics[i]
                   : deckCtrl.deck[i - deckCtrl.basics.length];
-              if (isBasic) {
-                return Card(
-                  color: Colors.green[50],
-                  child: ListTile(
-                    leading: Image.network(
-                      card.small_image_url,
-                      fit: BoxFit.cover,
-                    ),
-                    title: Text(
-                      card.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    trailing: const Icon(Icons.grass, color: Colors.green),
-                  ),
-                );
-              }
+              final cardColor = isBasic ? Colors.green[50] : null;
+              final titleStyle = isBasic
+                  ? const TextStyle(fontWeight: FontWeight.bold)
+                  : null;
+              final trailing = isBasic
+                  ? const Icon(Icons.grass, color: Colors.green)
+                  : null;
+
               return Card(
+                color: cardColor,
                 child: ListTile(
                   leading: Image.network(
                     card.small_image_url,
                     fit: BoxFit.cover,
                   ),
-                  title: Text(card.name),
+                  title: Text(card.name, style: titleStyle),
+                  trailing: trailing,
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => CardPopup(card: card),
+                    );
+                  },
                 ),
               );
             },

@@ -7,15 +7,21 @@ class CardImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.network(
-      url,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) =>
-          Center(child: Icon(Icons.broken_image)),
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Center(child: CircularProgressIndicator());
-      },
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(12),
+        bottom: Radius.circular(12),
+      ),
+      child: Image.network(
+        url,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            Center(child: Icon(Icons.broken_image)),
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(child: CircularProgressIndicator());
+        },
+      ),
     );
   }
 }
