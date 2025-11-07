@@ -46,7 +46,37 @@ class SwipePanel extends StatelessWidget {
             },
           ),
         ),
-        // Text(engine.currentItem.content)
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(16),
+                  ),
+                  onPressed: () {
+                    engine!.currentItem?.nope();
+                  },
+                  child: const Icon(Icons.close_rounded),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(16),
+                  ),
+                  onPressed: () {
+                    engine!.currentItem?.like();
+                  },
+                  child: const Icon(Icons.favorite),
+                ),
+              ],
+            ),
+          ),
+        ),
         PriceBar(
           engine: engine,
           items: items,

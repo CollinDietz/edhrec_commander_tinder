@@ -14,6 +14,7 @@ class CostLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildIcon(),
         const SizedBox(width: 8),
