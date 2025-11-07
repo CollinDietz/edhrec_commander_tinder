@@ -24,7 +24,6 @@ class _DraftScreenState extends State<DraftScreen> {
   List<Future<CardInfo>?> _futures = [];
   List<CardInfo?> _resolved = [];
   int _mobileTab = 0; // 0 = draft, 1 = commander, 2 = deck
-  int _currentIndex = 0; // tracks active swipe card index
 
   @override
   void didChangeDependencies() {
@@ -50,16 +49,10 @@ class _DraftScreenState extends State<DraftScreen> {
                   MaterialPageRoute(builder: (_) => const FinishedScreen()),
                 );
               }
-              if (mounted && _currentIndex == i) {
-                setState(() => _currentIndex++);
-              }
             });
           },
           nopeAction: () {
-            // Advance index on dislike/pass
-            if (mounted && _currentIndex == i) {
-              setState(() => _currentIndex++);
-            }
+            if (mounted) setState(() {});
           },
         );
       });
@@ -83,7 +76,12 @@ class _DraftScreenState extends State<DraftScreen> {
 
   Widget _buildDesktopLayout(DeckController deckCtrl, Commander commander) {
     return Scaffold(
-      appBar: AppBar(title: Text('Draft: ${commander.cardInfo.name}')),
+      appBar: AppBar(
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(0),
+          child: DraftProgressBar(),
+        ),
+      ),
       body: Row(
         children: [
           const Expanded(child: CommanderCardPanel()),
@@ -94,7 +92,6 @@ class _DraftScreenState extends State<DraftScreen> {
               items: _items,
               resolved: _resolved,
               futures: _futures,
-              currentIndex: _currentIndex,
               basicsLength: deckCtrl.basics.length,
               onCardResolved: (i) {
                 if (mounted) setState(() {});
@@ -108,17 +105,6 @@ class _DraftScreenState extends State<DraftScreen> {
   }
 
   Widget _buildMobileLayout(DeckController deckCtrl, Commander commander) {
-    String title;
-    switch (_mobileTab) {
-      case 1:
-        title = 'Commander';
-        break;
-      case 2:
-        title = 'Deck (${deckCtrl.deck.length + deckCtrl.basics.length}/99)';
-        break;
-      default:
-        title = 'Draft: ${commander.cardInfo.name}';
-    }
     return Scaffold(
       appBar: AppBar(
         bottom: const PreferredSize(
@@ -171,7 +157,6 @@ class _DraftScreenState extends State<DraftScreen> {
           items: _items,
           resolved: _resolved,
           futures: _futures,
-          currentIndex: _currentIndex,
           basicsLength: deckCtrl.basics.length,
           onCardResolved: (i) {
             if (mounted) setState(() {});

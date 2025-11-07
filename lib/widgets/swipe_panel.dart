@@ -4,7 +4,6 @@ import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
 import 'swipe_area.dart';
-import 'draft_progress_bar.dart';
 import 'price_bar.dart';
 
 class SwipePanel extends StatelessWidget {
@@ -12,7 +11,6 @@ class SwipePanel extends StatelessWidget {
   final List<SwipeItem> items;
   final List<CardInfo?> resolved;
   final List<Future<CardInfo>?> futures;
-  final int currentIndex;
   final int basicsLength;
   final ValueChanged<int> onCardResolved;
 
@@ -22,7 +20,6 @@ class SwipePanel extends StatelessWidget {
     required this.items,
     required this.resolved,
     required this.futures,
-    required this.currentIndex,
     required this.basicsLength,
     required this.onCardResolved,
   });
@@ -40,8 +37,8 @@ class SwipePanel extends StatelessWidget {
             deckCtrl: deckCtrl,
             basicsLength: basicsLength,
             onResolved: (i) {
-              if (i == currentIndex) {
-                // Defer to next frame to avoid setState in build higher up.
+              // If resolved item is current engine item, notify parent post-frame.
+              if (engine?.currentItem == items[i]) {
                 WidgetsBinding.instance.addPostFrameCallback(
                   (_) => onCardResolved(i),
                 );
@@ -51,8 +48,8 @@ class SwipePanel extends StatelessWidget {
         ),
         // Text(engine.currentItem.content)
         PriceBar(
-          currentIndex: currentIndex,
-          total: items.length,
+          engine: engine,
+          items: items,
           resolved: resolved,
           futures: futures,
         ),

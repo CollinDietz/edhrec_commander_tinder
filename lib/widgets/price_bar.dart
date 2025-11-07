@@ -1,6 +1,6 @@
+import 'package:edhrec_commander_tinder/widgets/cost_label.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
+import 'package:swipe_cards/swipe_cards.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
 
 /// PriceBar
@@ -8,22 +8,28 @@ import 'package:edhrec_commander_tinder/models/card_info.dart';
 /// Takes references to the resolved and futures lists so it can lazily
 /// trigger fetching of the current card if needed.
 class PriceBar extends StatelessWidget {
-  final int currentIndex;
-  final int total;
+  final MatchEngine? engine;
+  final List<SwipeItem> items;
   final List<CardInfo?> resolved;
   final List<Future<CardInfo>?> futures;
   const PriceBar({
     super.key,
-    required this.currentIndex,
-    required this.total,
+    required this.engine,
+    required this.items,
     required this.resolved,
     required this.futures,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Watch deck controller so bar rebuilds when deck changes (e.g., index advances).
-    context.watch<DeckController>();
+    if (engine == null) {
+      return _wrap(const SizedBox());
+    }
+    final currentItem = engine!.currentItem;
+    final int currentIndex = currentItem == null
+        ? 0
+        : items.indexOf(currentItem);
+    final int total = items.length;
 
     if (currentIndex >= total) {
       return _wrap(
@@ -37,25 +43,15 @@ class PriceBar extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.attach_money, color: Colors.green),
-            Text(
-              info.price.toStringAsFixed(2),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+            CostLabel(cost: info.price),
             const SizedBox(width: 24),
             Text(
               'Card ${currentIndex + 1}/$total',
-              style: const TextStyle(fontSize: 14, color: Colors.black54),
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ],
         ),
       );
-    }
-
-    // Trigger fetch if not already started.
-    final deckCtrl = context.read<DeckController>();
-    if (futures[currentIndex] == null) {
-      futures[currentIndex] = deckCtrl.commander!.getCard(currentIndex);
     }
 
     return _wrap(

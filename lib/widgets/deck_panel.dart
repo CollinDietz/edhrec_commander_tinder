@@ -1,13 +1,6 @@
-import 'package:edhrec_commander_tinder/widgets/cost_label.dart';
-import 'package:edhrec_commander_tinder/widgets/count_label.dart';
-import 'package:edhrec_commander_tinder/widgets/deck_progress_indicator.dart';
-import 'package:edhrec_commander_tinder/widgets/draft_progress_bar.dart';
-import 'package:edhrec_commander_tinder/widgets/finish_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
-import 'package:edhrec_commander_tinder/screens/finished_screen.dart';
 
 class DeckPanel extends StatelessWidget {
   const DeckPanel({super.key});
