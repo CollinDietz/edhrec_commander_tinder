@@ -13,6 +13,8 @@ class SwipePanel extends StatelessWidget {
   final List<Future<CardInfo>?> futures;
   final int basicsLength;
   final ValueChanged<int> onCardResolved;
+  final ValueChanged<int> onItemChanged;
+  final int currentIndex;
 
   const SwipePanel({
     super.key,
@@ -22,6 +24,8 @@ class SwipePanel extends StatelessWidget {
     required this.futures,
     required this.basicsLength,
     required this.onCardResolved,
+    required this.onItemChanged,
+    required this.currentIndex,
   });
 
   @override
@@ -44,6 +48,7 @@ class SwipePanel extends StatelessWidget {
                 );
               }
             },
+            onItemChanged: onItemChanged,
           ),
         ),
         Align(
@@ -78,10 +83,10 @@ class SwipePanel extends StatelessWidget {
           ),
         ),
         PriceBar(
-          engine: engine,
           items: items,
           resolved: resolved,
           futures: futures,
+          currentIndex: currentIndex,
         ),
       ],
     );

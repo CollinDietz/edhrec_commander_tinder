@@ -1,22 +1,20 @@
 import 'package:edhrec_commander_tinder/widgets/cost_label.dart';
 import 'package:flutter/material.dart';
-import 'package:edhrec_commander_tinder/models/commander.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
 import 'package:edhrec_commander_tinder/widgets/card_image.dart';
 
-class CommanderCard extends StatelessWidget {
-  final Commander commander;
-  const CommanderCard({super.key, required this.commander});
+class CardWithPrice extends StatelessWidget {
+  final CardInfo card;
+  const CardWithPrice({super.key, required this.card});
 
   @override
   Widget build(BuildContext context) {
-    final CardInfo card = commander.cardInfo;
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CardImage(url: card.image_url),
+          CardImage(url: card.imageUrl),
           const SizedBox(height: 8),
           CostLabel(
             cost: card.price,

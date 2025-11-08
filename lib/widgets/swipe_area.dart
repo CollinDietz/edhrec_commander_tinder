@@ -10,7 +10,8 @@ class SwipeArea extends StatelessWidget {
   final List<CardInfo?> resolved;
   final DeckController deckCtrl;
   final int basicsLength;
-  final ValueChanged<int>? onResolved; // callback when a card resolves
+  final ValueChanged<int>? onResolved;
+  final ValueChanged<int>? onItemChanged;
   const SwipeArea({
     super.key,
     required this.engine,
@@ -19,6 +20,7 @@ class SwipeArea extends StatelessWidget {
     required this.deckCtrl,
     required this.basicsLength,
     this.onResolved,
+    this.onItemChanged,
   });
 
   @override
@@ -60,6 +62,9 @@ class SwipeArea extends StatelessWidget {
             context,
           ).showSnackBar(const SnackBar(content: Text('No more cards')));
         }
+      },
+      itemChanged: (item, index) {
+        onItemChanged?.call(index);
       },
     );
   }

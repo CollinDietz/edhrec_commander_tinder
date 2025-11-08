@@ -1,4 +1,4 @@
-import 'package:edhrec_commander_tinder/widgets/card_image.dart';
+import 'package:edhrec_commander_tinder/widgets/commander_card.dart';
 import 'package:flutter/material.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
 
@@ -15,7 +15,7 @@ class CardPopup extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CardImage(url: card.image_url),
+          CardWithPrice(card: card),
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: TextButton(

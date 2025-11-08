@@ -60,14 +60,15 @@ class _SplashScreenState extends State<SplashScreen> {
                         }
                         setState(() => _error = null);
                         deck.setCommanderUrl(url);
+                        final navigator = Navigator.of(context);
                         await deck.loadCommander();
                         if (deck.loadError != null) {
+                          if (!mounted) return;
                           setState(() => _error = 'Failed to load commander');
                           return;
                         }
                         if (!mounted) return;
-                        Navigator.pushReplacement(
-                          context,
+                        navigator.pushReplacement(
                           MaterialPageRoute(
                             builder: (_) => const DraftScreen(),
                           ),

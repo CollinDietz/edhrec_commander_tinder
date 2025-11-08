@@ -8,27 +8,20 @@ import 'package:edhrec_commander_tinder/models/card_info.dart';
 /// Takes references to the resolved and futures lists so it can lazily
 /// trigger fetching of the current card if needed.
 class PriceBar extends StatelessWidget {
-  final MatchEngine? engine;
   final List<SwipeItem> items;
   final List<CardInfo?> resolved;
   final List<Future<CardInfo>?> futures;
+  final int currentIndex;
   const PriceBar({
     super.key,
-    required this.engine,
     required this.items,
     required this.resolved,
     required this.futures,
+    required this.currentIndex,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (engine == null) {
-      return _wrap(const SizedBox());
-    }
-    final currentItem = engine!.currentItem;
-    final int currentIndex = currentItem == null
-        ? 0
-        : items.indexOf(currentItem);
     final int total = items.length;
 
     if (currentIndex >= total) {

@@ -8,6 +8,6 @@ class CardDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CardImage(url: card.image_url);
+    return CardImage(url: card.imageUrl);
   }
 }

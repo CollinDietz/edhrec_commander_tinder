@@ -24,6 +24,7 @@ class _DraftScreenState extends State<DraftScreen> {
   List<Future<CardInfo>?> _futures = [];
   List<CardInfo?> _resolved = [];
   int _mobileTab = 0; // 0 = draft, 1 = commander, 2 = deck
+  int _currentIndex = 0;
 
   @override
   void didChangeDependencies() {
@@ -51,12 +52,10 @@ class _DraftScreenState extends State<DraftScreen> {
               }
             });
           },
-          nopeAction: () {
-            if (mounted) setState(() {});
-          },
         );
       });
       _engine = MatchEngine(swipeItems: _items);
+      _currentIndex = 0;
     }
   }
 
@@ -96,6 +95,10 @@ class _DraftScreenState extends State<DraftScreen> {
               onCardResolved: (i) {
                 if (mounted) setState(() {});
               },
+              onItemChanged: (i) {
+                if (mounted) setState(() => _currentIndex = i);
+              },
+              currentIndex: _currentIndex,
             ),
           ),
           const Expanded(child: DeckPanel()),
@@ -161,6 +164,10 @@ class _DraftScreenState extends State<DraftScreen> {
           onCardResolved: (i) {
             if (mounted) setState(() {});
           },
+          onItemChanged: (i) {
+            if (mounted) setState(() => _currentIndex = i);
+          },
+          currentIndex: _currentIndex,
         );
     }
   }
@@ -176,8 +183,6 @@ class CommanderCardPanel extends StatelessWidget {
     if (commander == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    return CommanderCard(commander: commander);
+    return CardWithPrice(card: commander.cardInfo);
   }
 }
-
-// (Price bar logic moved to widgets/price_bar.dart)

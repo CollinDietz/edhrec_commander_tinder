@@ -4,16 +4,16 @@ import 'package:http/http.dart' as http;
 
 class CardInfo {
   final String name;
-  final String image_url;
-  final String small_image_url;
+  final String imageUrl;
+  final String smallImageUrl;
   final String uuid;
   final double price;
 
   CardInfo({
     required this.name,
     required this.uuid,
-    required this.image_url,
-    required this.small_image_url,
+    required this.imageUrl,
+    required this.smallImageUrl,
     required this.price,
   });
 
@@ -24,10 +24,10 @@ class CardInfo {
       price:
           json['container']['json_dict']['card']['prices']['tcgplayer']['price']
               as double,
-      image_url:
+      imageUrl:
           json['container']['json_dict']['card']['image_uris'][0]['normal']
               as String,
-      small_image_url:
+      smallImageUrl:
           json['container']['json_dict']['card']['image_uris'][0]['art_crop']
               as String,
     );

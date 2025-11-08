@@ -151,7 +151,7 @@ class FinishedScreen extends StatelessWidget {
                         : deckCtrl.basics[i - deckCtrl.deck.length];
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Image.network(card.image_url),
+                      child: Image.network(card.imageUrl),
                     );
                   },
                 ),
