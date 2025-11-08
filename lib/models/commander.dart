@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
+import 'package:edhrec_commander_tinder/models/recommendation_stats.dart';
 import 'package:http/http.dart' as http;
 
 class Commander {
   final CardInfo cardInfo;
-  final List<String> cardJsonUrls;
   final List<String> basicsUrls;
+  final List<({String url, RecommendationStats stats})> cardStats;
 
   static const List<String> basics = [
     "c44f81ca-f72f-445c-8901-3a894a2a47f9", // Mountain
@@ -17,14 +18,14 @@ class Commander {
 
   Commander({
     required this.cardInfo,
-    required this.cardJsonUrls,
     required this.basicsUrls,
+    required this.cardStats,
   });
 
   factory Commander.fromJson(Map<String, dynamic> json) {
     final List<dynamic> cardLists = json['container']['json_dict']['cardlists'];
 
-    final List<MapEntry<String, double>> urlWithNumber = [];
+    final List<({String url, RecommendationStats stats})> stats = [];
     final List<String> basicsUrl = [];
     for (final Map<String, dynamic> cardList in cardLists) {
       for (final Map<String, dynamic> card in cardList['cardviews']) {
@@ -37,21 +38,25 @@ class Commander {
         if (basics.contains(id)) {
           basicsUrl.add(url);
         } else {
-          urlWithNumber.add(MapEntry(url, inclusion / potentialDecks));
+          stats.add((
+            url: url,
+            stats: RecommendationStats(
+              inclusion: inclusion,
+              potentialDecks: potentialDecks,
+            ),
+          ));
         }
       }
     }
 
-    urlWithNumber.sort((a, b) => b.value.compareTo(a.value));
+    stats.sort((a, b) => b.stats.ratio.compareTo(a.stats.ratio));
 
-    final List<String> urls = urlWithNumber.map((e) => e.key).toList();
-
-    final CardInfo cardInfo = CardInfo.fromJson(json);
+    final CardInfo cardInfo = CardInfo.fromJsonAndStats(json, null);
 
     return Commander(
       cardInfo: cardInfo,
-      cardJsonUrls: urls,
       basicsUrls: basicsUrl,
+      cardStats: stats,
     );
   }
 
@@ -65,11 +70,10 @@ class Commander {
     return Commander.fromJson(jsonData);
   }
 
-  List<Future<CardInfo>> getBasics() {
-    return basicsUrls.map((url) => CardInfo.fromUrl(url)).toList();
-  }
-
   Future<CardInfo> getCard(int index) {
-    return CardInfo.fromUrl(cardJsonUrls[index]);
+    return CardInfo.fromUrlAndStats(
+      cardStats[index].url,
+      cardStats[index].stats,
+    );
   }
 }

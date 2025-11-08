@@ -1,4 +1,5 @@
 import 'package:edhrec_commander_tinder/widgets/cost_label.dart';
+import 'package:edhrec_commander_tinder/widgets/inclusion_label.dart';
 import 'package:flutter/material.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
@@ -7,12 +8,12 @@ import 'package:edhrec_commander_tinder/models/card_info.dart';
 /// Displays the current card price and position in the draft stack.
 /// Takes references to the resolved and futures lists so it can lazily
 /// trigger fetching of the current card if needed.
-class PriceBar extends StatelessWidget {
+class InfoBar extends StatelessWidget {
   final List<SwipeItem> items;
   final List<CardInfo?> resolved;
   final List<Future<CardInfo>?> futures;
   final int currentIndex;
-  const PriceBar({
+  const InfoBar({
     super.key,
     required this.items,
     required this.resolved,
@@ -37,6 +38,8 @@ class PriceBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CostLabel(cost: info.price),
+            const SizedBox(width: 24),
+            InclusionLabel(stats: info.stats!),
             const SizedBox(width: 24),
             Text(
               'Card ${currentIndex + 1}/$total',

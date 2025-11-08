@@ -42,7 +42,7 @@ class DeckController extends ChangeNotifier {
       final currentCommander = _commander;
       final urls = currentCommander?.basicsUrls ?? const [];
       for (final u in urls) {
-        CardInfo.fromUrl(u)
+        CardInfo.fromUrlAndStats(u, null)
             .then((card) {
               if (!identical(currentCommander, _commander)) return;
               _basics.add(card);

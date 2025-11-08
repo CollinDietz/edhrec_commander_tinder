@@ -4,7 +4,7 @@ import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
 import 'swipe_area.dart';
-import 'price_bar.dart';
+import 'info_bar.dart';
 
 class SwipePanel extends StatelessWidget {
   final MatchEngine? engine;
@@ -82,7 +82,7 @@ class SwipePanel extends StatelessWidget {
             ),
           ),
         ),
-        PriceBar(
+        InfoBar(
           items: items,
           resolved: resolved,
           futures: futures,

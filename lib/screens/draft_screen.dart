@@ -6,7 +6,7 @@ import 'package:edhrec_commander_tinder/models/commander.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'finished_screen.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
-import 'package:edhrec_commander_tinder/widgets/commander_card.dart';
+import 'package:edhrec_commander_tinder/widgets/card_with_info.dart';
 import 'package:edhrec_commander_tinder/widgets/deck_panel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:edhrec_commander_tinder/widgets/swipe_panel.dart';
@@ -32,9 +32,9 @@ class _DraftScreenState extends State<DraftScreen> {
     final deckCtrl = context.watch<DeckController>();
     final commander = deckCtrl.commander;
     if (commander != null && _engine == null) {
-      _futures = List.filled(commander.cardJsonUrls.length, null);
-      _resolved = List.filled(commander.cardJsonUrls.length, null);
-      _items = List.generate(commander.cardJsonUrls.length, (i) {
+      _futures = List.filled(commander.cardStats.length, null);
+      _resolved = List.filled(commander.cardStats.length, null);
+      _items = List.generate(commander.cardStats.length, (i) {
         return SwipeItem(
           content: () {
             _futures[i] ??= commander.getCard(i);
@@ -183,6 +183,6 @@ class CommanderCardPanel extends StatelessWidget {
     if (commander == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    return CardWithPrice(card: commander.cardInfo);
+    return CardWithInfo(card: commander.cardInfo);
   }
 }

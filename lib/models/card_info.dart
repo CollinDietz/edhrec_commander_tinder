@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:edhrec_commander_tinder/models/recommendation_stats.dart';
 import 'package:http/http.dart' as http;
 
 class CardInfo {
@@ -8,6 +9,7 @@ class CardInfo {
   final List<String> smallImageUrls;
   final String uuid;
   final double price;
+  final RecommendationStats? stats;
 
   CardInfo({
     required this.name,
@@ -15,9 +17,13 @@ class CardInfo {
     required this.imageUrls,
     required this.smallImageUrls,
     required this.price,
+    required this.stats,
   });
 
-  factory CardInfo.fromJson(Map<String, dynamic> json) {
+  factory CardInfo.fromJsonAndStats(
+    Map<String, dynamic> json,
+    RecommendationStats? stats,
+  ) {
     final cardJson = json['container']['json_dict']['card'];
     final List<dynamic> imageUris = cardJson['image_uris'] as List<dynamic>;
     final normalImages = <String>[];
@@ -36,16 +42,20 @@ class CardInfo {
       price: cardJson['prices']['tcgplayer']['price'] as double,
       imageUrls: normalImages,
       smallImageUrls: artCropImages,
+      stats: stats,
     );
   }
 
-  static Future<CardInfo> fromUrl(String url) async {
+  static Future<CardInfo> fromUrlAndStats(
+    String url,
+    RecommendationStats? stats,
+  ) async {
     final uri = Uri.parse(url);
     final response = await http.get(uri);
     if (response.statusCode != 200) {
       throw Exception('Failed to load commander data');
     }
     final jsonData = json.decode(response.body);
-    return CardInfo.fromJson(jsonData);
+    return CardInfo.fromJsonAndStats(jsonData, stats);
   }
 }
