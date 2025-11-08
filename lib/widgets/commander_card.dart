@@ -1,7 +1,7 @@
+import 'package:edhrec_commander_tinder/widgets/card_display.dart';
 import 'package:edhrec_commander_tinder/widgets/cost_label.dart';
 import 'package:flutter/material.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
-import 'package:edhrec_commander_tinder/widgets/card_image.dart';
 
 class CardWithPrice extends StatelessWidget {
   final CardInfo card;
@@ -14,7 +14,7 @@ class CardWithPrice extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CardImage(url: card.imageUrl),
+          CardDisplay(card: card),
           const SizedBox(height: 8),
           CostLabel(
             cost: card.price,

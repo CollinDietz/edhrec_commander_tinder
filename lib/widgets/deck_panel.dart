@@ -31,7 +31,10 @@ class DeckPanel extends StatelessWidget {
               return Card(
                 color: cardColor,
                 child: ListTile(
-                  leading: Image.network(card.smallImageUrl, fit: BoxFit.cover),
+                  leading: Image.network(
+                    card.smallImageUrls.first,
+                    fit: BoxFit.cover,
+                  ),
                   title: Text(card.name, style: titleStyle),
                   trailing: trailing,
                   onTap: () {

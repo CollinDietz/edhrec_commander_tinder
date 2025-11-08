@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:edhrec_commander_tinder/widgets/card_display.dart';
+import 'package:edhrec_commander_tinder/widgets/card_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
@@ -149,10 +151,7 @@ class FinishedScreen extends StatelessWidget {
                     final card = isDeck
                         ? deckCtrl.deck[i]
                         : deckCtrl.basics[i - deckCtrl.deck.length];
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Image.network(card.imageUrl),
-                    );
+                    return CardDisplay(card: card);
                   },
                 ),
               ),
