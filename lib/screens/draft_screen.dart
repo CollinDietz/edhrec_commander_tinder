@@ -75,12 +75,6 @@ class _DraftScreenState extends State<DraftScreen> {
 
   Widget _buildDesktopLayout(DeckController deckCtrl, Commander commander) {
     return Scaffold(
-      appBar: AppBar(
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(0),
-          child: DraftProgressBar(),
-        ),
-      ),
       body: Row(
         children: [
           const Expanded(child: CommanderCardPanel()),
@@ -101,7 +95,14 @@ class _DraftScreenState extends State<DraftScreen> {
               currentIndex: _currentIndex,
             ),
           ),
-          const Expanded(child: DeckPanel()),
+          const Expanded(
+            child: Column(
+              children: [
+                DraftProgressBar(),
+                Expanded(child: DeckPanel()),
+              ],
+            ),
+          ),
         ],
       ),
     );

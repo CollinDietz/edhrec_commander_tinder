@@ -14,7 +14,7 @@ class CardImage extends StatelessWidget {
       ),
       child: Image.network(
         url,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) =>
             Center(child: Icon(Icons.broken_image)),
         loadingBuilder: (context, child, loadingProgress) {
