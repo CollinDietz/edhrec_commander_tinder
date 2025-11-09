@@ -184,6 +184,33 @@ class CommanderCardPanel extends StatelessWidget {
     if (commander == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    return CardWithInfo(card: commander.cardInfo);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Target ideal width/height based on typical card aspect ratio.
+        const double idealWidth = 320;
+        const double aspect = 88 / 63; // card height/width approx
+        final double idealHeight =
+            idealWidth * aspect + 140; // image + info area
+
+        // Compute scale so content fits within available constraints.
+        final scaleW = constraints.maxWidth / idealWidth;
+        final scaleH = constraints.maxHeight / idealHeight;
+        final scale = scaleW < scaleH ? scaleW : scaleH;
+
+        // Clamp scale to not blow up excessively.
+        final appliedScale = scale.clamp(0.2, 1.0);
+
+        return Center(
+          child: Transform.scale(
+            scale: appliedScale.toDouble(),
+            alignment: Alignment.center,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: idealWidth),
+              child: CardWithInfo(card: commander.cardInfo),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
