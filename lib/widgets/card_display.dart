@@ -79,9 +79,7 @@ class _CardDisplayState extends State<CardDisplay> {
                     opacity: 0.7 - (0.15 * bi),
                     child: SizedBox(
                       width: cardWidth,
-                      child: IgnorePointer(
-                        child: CardImage(url: images[behindIndices[bi]]),
-                      ),
+                      child: CardImage(url: images[behindIndices[bi]]),
                     ),
                   ),
                 ),
