@@ -1,4 +1,5 @@
 import 'package:edhrec_commander_tinder/widgets/draft_progress_bar.dart';
+import 'package:edhrec_commander_tinder/widgets/deck_composition_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
@@ -75,6 +76,7 @@ class _DraftScreenState extends State<DraftScreen> {
 
   Widget _buildDesktopLayout(DeckController deckCtrl, Commander commander) {
     return Scaffold(
+      endDrawer: DeckCompositionDrawer(deckCtrl: deckCtrl),
       body: Row(
         children: [
           const Expanded(child: CommanderCardPanel()),
@@ -116,6 +118,7 @@ class _DraftScreenState extends State<DraftScreen> {
           child: DraftProgressBar(),
         ),
       ),
+      drawer: DeckCompositionDrawer(deckCtrl: deckCtrl),
       body: _buildMobileContent(deckCtrl, commander),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _mobileTab,

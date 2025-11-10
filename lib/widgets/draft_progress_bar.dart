@@ -36,6 +36,11 @@ class DraftProgressBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
+          IconButton(
+            tooltip: 'Deck Composition',
+            icon: const Icon(Icons.auto_graph),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
           CountLabel(totalCount: totalCount),
           const SizedBox(width: 16),
           Expanded(child: DeckProgressIndicator(progress: progress)),
