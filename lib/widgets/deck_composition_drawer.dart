@@ -1,3 +1,4 @@
+import 'package:edhrec_commander_tinder/widgets/category_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
@@ -7,15 +8,26 @@ class DeckCompositionDrawer extends StatelessWidget {
   final DeckController deckCtrl;
   const DeckCompositionDrawer({super.key, required this.deckCtrl});
 
-  static final _categories = <_CatSpec>[
-    _CatSpec('Creature', Colors.green, (t) => t.contains('Creature')),
-    _CatSpec('Instant', Colors.blue, (t) => t.contains('Instant')),
-    _CatSpec('Sorcery', Colors.deepPurple, (t) => t.contains('Sorcery')),
-    _CatSpec('Artifact', Colors.grey, (t) => t.contains('Artifact')),
-    _CatSpec('Enchantment', Colors.pink, (t) => t.contains('Enchantment')),
-    _CatSpec('Planeswalker', Colors.orange, (t) => t.contains('Planeswalker')),
-    _CatSpec('Land', Colors.brown, (t) => t.contains('Land')),
-  ];
+  Widget _titleRow(BuildContext context) {
+    return Row(
+      children: [
+        Icon(Icons.query_stats, color: Theme.of(context).colorScheme.primary),
+        const SizedBox(width: 8),
+        Text(
+          'Deck Composition',
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        const Spacer(),
+        IconButton(
+          tooltip: 'Close',
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,40 +47,24 @@ class DeckCompositionDrawer extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.auto_graph,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Deck Composition',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    tooltip: 'Close',
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).maybePop(),
-                  ),
-                ],
-              ),
+              _titleRow(context),
               const Divider(height: 24),
               Expanded(
                 child: ListView.separated(
-                  itemCount: _categories.length,
+                  itemCount: categoryColors.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, i) {
-                    final spec = _categories[i];
+                    final spec = categoryColors.entries.elementAt(i);
                     final count = cards
-                        .where((c) => spec.predicate(c.type))
+                        .where(
+                          (c) =>
+                              c.type == categoryColors.entries.elementAt(i).key,
+                        )
                         .length;
-                    final pct = count / totalTarget;
-                    return _CategoryTile(
-                      spec: spec,
+                    final pct = count / cards.length;
+                    return _CategoryProgress(
+                      category: spec.key,
+                      color: spec.value,
                       count: count,
                       percent: pct,
                     );
@@ -83,19 +79,14 @@ class DeckCompositionDrawer extends StatelessWidget {
   }
 }
 
-class _CatSpec {
-  final String label;
+class _CategoryProgress extends StatelessWidget {
+  final String category;
   final Color color;
-  final bool Function(String) predicate;
-  const _CatSpec(this.label, this.color, this.predicate);
-}
-
-class _CategoryTile extends StatelessWidget {
-  final _CatSpec spec;
   final int count;
   final double percent;
-  const _CategoryTile({
-    required this.spec,
+  const _CategoryProgress({
+    required this.category,
+    required this.color,
     required this.count,
     required this.percent,
   });
@@ -103,13 +94,8 @@ class _CategoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: spec.color.withOpacity(0.4)),
-      ),
+    return CategoryTile(
+      category: category,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -119,14 +105,14 @@ class _CategoryTile extends StatelessWidget {
                 width: 10,
                 height: 10,
                 decoration: BoxDecoration(
-                  color: spec.color,
+                  color: color,
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  spec.label,
+                  category,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -142,7 +128,7 @@ class _CategoryTile extends StatelessWidget {
               minHeight: 8,
               value: percent.clamp(0, 1),
               backgroundColor: theme.colorScheme.surface,
-              valueColor: AlwaysStoppedAnimation(spec.color),
+              valueColor: AlwaysStoppedAnimation(color),
             ),
           ),
         ],

@@ -35,7 +35,7 @@ class DraftProgressBar extends StatelessWidget {
         children: [
           IconButton(
             tooltip: 'Deck Composition',
-            icon: const Icon(Icons.auto_graph),
+            icon: const Icon(Icons.query_stats),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
           CountLabel(totalCount: totalCount),

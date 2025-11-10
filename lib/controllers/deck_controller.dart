@@ -14,6 +14,16 @@ class DeckController extends ChangeNotifier {
   Commander? get commander => _commander;
   List<CardInfo> get deck => List.unmodifiable(_deck);
   List<CardInfo> get basics => List.unmodifiable(_basics);
+
+  // Returns list of each unique basic card with its count.
+  List<MapEntry<CardInfo, int>> get basicsWithCounts {
+    final map = <CardInfo, int>{};
+    for (final card in _basics) {
+      map[card] = (map[card] ?? 0) + 1;
+    }
+    return map.entries.toList(growable: false);
+  }
+
   bool get loadingCommander => _loadingCommander;
   Object? get loadError => _loadError;
 
@@ -41,17 +51,25 @@ class DeckController extends ChangeNotifier {
       _basics.clear();
       final currentCommander = _commander;
       final urls = currentCommander?.basicsUrls ?? const [];
-      for (final u in urls) {
-        CardInfo.fromUrlAndStats(u, null)
-            .then((card) {
-              if (!identical(currentCommander, _commander)) return;
-              _basics.add(card);
-              notifyListeners();
-            })
-            .catchError((_) {
-              // Ignore individual basic load errors.
-            });
+
+      final futures = urls.map((u) async {
+        try {
+          return await CardInfo.fromUrlAndStats(u, null);
+        } catch (_) {
+          return null;
+        }
+      }).toList();
+
+      final loaded = await Future.wait(futures);
+
+      if (!identical(currentCommander, _commander)) return;
+
+      final basicsList = loaded.whereType<CardInfo>().toList();
+      _basics.addAll(basicsList);
+      while (_basics.length < 38 && basicsList.isNotEmpty) {
+        _basics.add(basicsList[_basics.length % basicsList.length]);
       }
+      notifyListeners();
     } catch (e) {
       _loadError = e;
     } finally {
