@@ -1,7 +1,6 @@
 import 'package:edhrec_commander_tinder/widgets/cost_label.dart';
 import 'package:edhrec_commander_tinder/widgets/inclusion_label.dart';
 import 'package:flutter/material.dart';
-import 'package:swipe_cards/swipe_cards.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
 
 /// PriceBar
@@ -9,42 +8,39 @@ import 'package:edhrec_commander_tinder/models/card_info.dart';
 /// Takes references to the resolved and futures lists so it can lazily
 /// trigger fetching of the current card if needed.
 class InfoBar extends StatelessWidget {
-  final List<SwipeItem> items;
-  final List<CardInfo?> resolved;
-  final List<Future<CardInfo>?> futures;
+  final int numItems;
+  final CardInfo? card;
   final int currentIndex;
   const InfoBar({
     super.key,
-    required this.items,
-    required this.resolved,
-    required this.futures,
+    required this.numItems,
+    required this.card,
     required this.currentIndex,
   });
 
   @override
   Widget build(BuildContext context) {
-    final int total = items.length;
-
-    if (currentIndex >= total) {
+    if (currentIndex >= numItems) {
       return _wrap(
         const Text('Done', style: TextStyle(fontWeight: FontWeight.w600)),
       );
     }
 
-    final CardInfo? info = resolved[currentIndex];
-    if (info != null) {
+    if (card != null) {
       return _wrap(
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CostLabel(cost: info.price),
-            const SizedBox(width: 24),
-            InclusionLabel(stats: info.stats!),
-            const SizedBox(width: 24),
+            CostLabel(cost: card!.price),
+            const SizedBox(width: 8),
+            InclusionLabel(stats: card!.stats!),
+            const SizedBox(width: 8),
             Text(
-              'Card ${currentIndex + 1}/$total',
+              'Card ${currentIndex + 1}/$numItems',
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
+            const SizedBox(width: 8),
+            Text(card!.type),
           ],
         ),
       );

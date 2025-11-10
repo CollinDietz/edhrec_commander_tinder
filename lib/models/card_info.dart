@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 class CardInfo {
   final String name;
+  final String type;
   final List<String> imageUrls;
   final List<String> smallImageUrls;
   final String uuid;
@@ -13,6 +14,7 @@ class CardInfo {
 
   CardInfo({
     required this.name,
+    required this.type,
     required this.uuid,
     required this.imageUrls,
     required this.smallImageUrls,
@@ -38,6 +40,7 @@ class CardInfo {
     }
     return CardInfo(
       name: cardJson['name'] as String,
+      type: cardJson['primary_type'] as String,
       uuid: cardJson['id'] as String,
       price: cardJson['prices']['tcgplayer']['price'] as double,
       imageUrls: normalImages,

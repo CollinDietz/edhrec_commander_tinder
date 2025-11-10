@@ -83,9 +83,8 @@ class SwipePanel extends StatelessWidget {
           ),
         ),
         InfoBar(
-          items: items,
-          resolved: resolved,
-          futures: futures,
+          numItems: items.length,
+          card: resolved[currentIndex],
           currentIndex: currentIndex,
         ),
       ],
