@@ -104,7 +104,7 @@ class FinishedScreen extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              '\$${(deckCtrl.deck.fold<double>(0, (sum, card) => sum + (card.price)) + deckCtrl.commander!.cardInfo.price).toStringAsFixed(2)}',
+              '\$${deckCtrl.price.toStringAsFixed(2)}',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,

@@ -73,4 +73,9 @@ class DeckController extends ChangeNotifier {
     _loadError = null;
     notifyListeners();
   }
+
+  double get price =>
+      deck.fold<double>(0, (sum, card) => sum + (card.price)) +
+      basics.fold<double>(0, (sum, card) => sum + (card.price)) +
+      (commander != null ? commander!.cardInfo.price : 0);
 }

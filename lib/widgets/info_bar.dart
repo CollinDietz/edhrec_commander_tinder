@@ -31,16 +31,16 @@ class InfoBar extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Spacer(),
             CostLabel(cost: card!.price),
-            const SizedBox(width: 8),
+            Spacer(),
             InclusionLabel(stats: card!.stats!),
-            const SizedBox(width: 8),
+            Spacer(),
             Text(
               'Card ${currentIndex + 1}/$numItems',
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
-            const SizedBox(width: 8),
-            Text(card!.type),
+            Spacer(),
           ],
         ),
       );

@@ -26,10 +26,7 @@ class DraftProgressBar extends StatelessWidget {
     final int deckCount = controller.deck.length;
     final int totalCount = basicsCount + deckCount;
     final double progress = totalCount / targetDeckSize;
-    final num cost =
-        controller.deck.fold<double>(0, (sum, card) => sum + (card.price)) +
-        controller.basics.fold<double>(0, (sum, card) => sum + (card.price)) +
-        controller.commander!.cardInfo.price;
+    final num cost = controller.price;
 
     return Container(
       height: 56,
