@@ -84,6 +84,28 @@ class DeckController extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool removeCard(CardInfo card) {
+    // Attempt removal from deck first; basics are generally auto-generated.
+    final index = _deck.indexWhere(
+      (c) => identical(c, card) || c.uuid == card.uuid,
+    );
+    if (index != -1) {
+      _deck.removeAt(index);
+      notifyListeners();
+      return true;
+    }
+    // Allow removal of a single instance of a basic if explicitly requested.
+    final basicIndex = _basics.indexWhere(
+      (c) => identical(c, card) || c.uuid == card.uuid,
+    );
+    if (basicIndex != -1) {
+      _basics.removeAt(basicIndex);
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
   void reset() {
     _commanderUrl = null;
     _commander = null;

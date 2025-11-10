@@ -49,7 +49,12 @@ class DeckPanel extends StatelessWidget {
                 onTap: () {
                   showDialog(
                     context: context,
-                    builder: (_) => CardPopup(card: card),
+                    builder: (_) => CardPopup(
+                      card: card,
+                      onRemove: !isBasic
+                          ? (() => deckCtrl.removeCard(card))
+                          : null,
+                    ),
                   );
                 },
                 child: CategoryTile(
