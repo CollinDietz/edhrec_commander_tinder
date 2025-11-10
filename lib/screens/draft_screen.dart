@@ -1,5 +1,4 @@
 import 'package:edhrec_commander_tinder/widgets/draft_progress_bar.dart';
-import 'package:edhrec_commander_tinder/widgets/deck_composition_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
@@ -26,6 +25,7 @@ class _DraftScreenState extends State<DraftScreen> {
   List<CardInfo?> _resolved = [];
   int _mobileTab = 0; // 0 = draft, 1 = commander, 2 = deck
   int _currentIndex = 0;
+  bool _progressExpanded = false;
 
   @override
   void didChangeDependencies() {
@@ -76,7 +76,6 @@ class _DraftScreenState extends State<DraftScreen> {
 
   Widget _buildDesktopLayout(DeckController deckCtrl, Commander commander) {
     return Scaffold(
-      endDrawer: DeckCompositionDrawer(deckCtrl: deckCtrl),
       body: Row(
         children: [
           const Expanded(child: CommanderCardPanel()),
@@ -97,11 +96,21 @@ class _DraftScreenState extends State<DraftScreen> {
               currentIndex: _currentIndex,
             ),
           ),
-          const Expanded(
+          Expanded(
             child: Column(
               children: [
-                DraftProgressBar(),
-                Expanded(child: DeckPanel()),
+                DraftProgressBar(
+                  onExpandedChanged: (v) =>
+                      setState(() => _progressExpanded = v),
+                ),
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    child: _progressExpanded
+                        ? const SizedBox.shrink()
+                        : const DeckPanel(),
+                  ),
+                ),
               ],
             ),
           ),
@@ -111,15 +120,29 @@ class _DraftScreenState extends State<DraftScreen> {
   }
 
   Widget _buildMobileLayout(DeckController deckCtrl, Commander commander) {
+    // App bar stays fixed; progress bar sits directly beneath it and expands,
+    // pushing content down rather than overlaying.
     return Scaffold(
-      appBar: AppBar(
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(0),
-          child: DraftProgressBar(),
+      body: SafeArea(
+        child: Column(
+          children: [
+            DraftProgressBar(
+              onExpandedChanged: (v) => setState(() => _progressExpanded = v),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: _progressExpanded
+                      ? const SizedBox.shrink()
+                      : _buildMobileContent(deckCtrl, commander),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
-      drawer: DeckCompositionDrawer(deckCtrl: deckCtrl),
-      body: _buildMobileContent(deckCtrl, commander),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _mobileTab,
         onTap: (i) => setState(() => _mobileTab = i),
@@ -189,30 +212,29 @@ class CommanderCardPanel extends StatelessWidget {
     }
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Target ideal width/height based on typical card aspect ratio.
+        // Desired baseline card width.
         const double idealWidth = 320;
-        const double aspect = 88 / 63; // card height/width approx
-        final double idealHeight =
-            idealWidth * aspect + 140; // image + info area
+        // We allow width to shrink but keep aspect by letting the CardDisplay handle its own sizing.
+        final double targetWidth = constraints.maxWidth < idealWidth
+            ? constraints.maxWidth
+            : idealWidth;
 
-        // Compute scale so content fits within available constraints.
-        final scaleW = constraints.maxWidth / idealWidth;
-        final scaleH = constraints.maxHeight / idealHeight;
-        final scale = scaleW < scaleH ? scaleW : scaleH;
-
-        // Clamp scale to not blow up excessively.
-        final appliedScale = scale.clamp(0.2, 1.0);
-
-        return Center(
-          child: Transform.scale(
-            scale: appliedScale.toDouble(),
-            alignment: Alignment.center,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: idealWidth),
-              child: CardWithInfo(card: commander.cardInfo),
-            ),
+        // Wrap in SingleChildScrollView if vertical space becomes too tight to avoid flex overflow.
+        final content = Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: targetWidth),
+            child: CardWithInfo(card: commander.cardInfo),
           ),
         );
+
+        // If card intrinsic height would overflow, make it scrollable (rough heuristic: available height < 400).
+        if (constraints.maxHeight < 400) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: content,
+          );
+        }
+        return content;
       },
     );
   }
