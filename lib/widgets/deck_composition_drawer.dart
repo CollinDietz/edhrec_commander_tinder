@@ -4,6 +4,16 @@ import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
 
+const categoryCounts = <String, int>{
+  'Creature': 26,
+  'Instant': 10,
+  'Sorcery': 10,
+  'Artifact': 8,
+  'Enchantment': 6,
+  'Planeswalker': 3,
+  'Land': 38,
+};
+
 class DeckCompositionDrawer extends StatelessWidget {
   final DeckController deckCtrl;
   const DeckCompositionDrawer({super.key, required this.deckCtrl});
@@ -38,7 +48,6 @@ class DeckCompositionDrawer extends StatelessWidget {
       ...controller.basics,
       if (controller.commander != null) controller.commander!.cardInfo,
     ];
-    final totalTarget = 99.0;
 
     return Drawer(
       child: SafeArea(
@@ -55,13 +64,8 @@ class DeckCompositionDrawer extends StatelessWidget {
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, i) {
                     final spec = categoryColors.entries.elementAt(i);
-                    final count = cards
-                        .where(
-                          (c) =>
-                              c.type == categoryColors.entries.elementAt(i).key,
-                        )
-                        .length;
-                    final pct = count / cards.length;
+                    final count = cards.where((c) => c.type == spec.key).length;
+                    final pct = count / categoryCounts[spec.key]!;
                     return _CategoryProgress(
                       category: spec.key,
                       color: spec.value,
@@ -118,7 +122,10 @@ class _CategoryProgress extends StatelessWidget {
                   ),
                 ),
               ),
-              Text('$count', style: theme.textTheme.labelLarge),
+              Text(
+                '$count of ${categoryCounts[category]!}',
+                style: theme.textTheme.labelLarge,
+              ),
             ],
           ),
           const SizedBox(height: 8),

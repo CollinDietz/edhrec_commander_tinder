@@ -80,6 +80,9 @@ class DeckController extends ChangeNotifier {
 
   void addCard(CardInfo card) {
     if (_deck.length >= 99) return;
+    if (card.type == 'Land') {
+      _basics.removeLast();
+    }
     _deck.add(card);
     notifyListeners();
   }
