@@ -51,7 +51,7 @@ class Commander {
 
     stats.sort((a, b) => b.stats.ratio.compareTo(a.stats.ratio));
 
-    final CardInfo cardInfo = CardInfo.fromJsonAndStats(json, null);
+    final CardInfo cardInfo = CardInfo.fromJsonAndStats(json, null, null);
 
     return Commander(
       cardInfo: cardInfo,
