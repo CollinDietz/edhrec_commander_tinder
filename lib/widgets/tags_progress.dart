@@ -18,11 +18,25 @@ class TagAnnotation {
   /// any card tag that starts with that prefix; otherwise it requires an exact
   /// match.
   bool matches(CardInfo card) {
-    if (tag.endsWith('-')) {
-      final prefix = tag;
+    if (tag.contains(' OR ')) {
+      final parts = tag
+          .split(' OR ')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty);
+      for (final part in parts) {
+        if (_singleMatches(card, part)) return true;
+      }
+      return false;
+    }
+    return _singleMatches(card, tag);
+  }
+
+  bool _singleMatches(CardInfo card, String raw) {
+    if (raw.endsWith('-')) {
+      final prefix = raw;
       return card.tags.any((t) => t.startsWith(prefix));
     }
-    return card.tags.contains(tag);
+    return card.tags.contains(raw);
   }
 
   /// Counts how many cards in the provided list satisfy this annotation.
@@ -30,13 +44,17 @@ class TagAnnotation {
 }
 
 const tagCounts = [
-  TagAnnotation(tag: 'life-gain', targetCount: 3, color: Colors.pinkAccent),
-  TagAnnotation(tag: 'ramp', targetCount: 10, color: Colors.green),
   TagAnnotation(tag: 'card-advantage', targetCount: 12, color: Colors.indigo),
-  TagAnnotation(tag: 'removal', targetCount: 12, color: Colors.deepOrange),
-  TagAnnotation(tag: 'sweeper', targetCount: 3, color: Colors.black87),
-  TagAnnotation(tag: 'recursion', targetCount: 4, color: Colors.teal),
+  TagAnnotation(
+    tag: 'removal OR counterspell',
+    targetCount: 12,
+    color: Colors.deepOrange,
+  ),
+  TagAnnotation(tag: 'ramp', targetCount: 10, color: Colors.green),
+  TagAnnotation(tag: 'life-gain', targetCount: 3, color: Colors.pinkAccent),
   TagAnnotation(tag: 'protects-', targetCount: 3, color: Colors.amber),
+  TagAnnotation(tag: 'recursion', targetCount: 3, color: Colors.teal),
+  TagAnnotation(tag: 'sweeper', targetCount: 3, color: Colors.black87),
 ];
 
 class TagsProgress extends StatelessWidget {
@@ -109,7 +127,7 @@ class _TagProgress extends StatelessWidget {
               Expanded(
                 child: Text(
                   tag
-                      .split('-')
+                      .split(RegExp(r'[\s-]+'))
                       .map(
                         (part) => part.isEmpty
                             ? part

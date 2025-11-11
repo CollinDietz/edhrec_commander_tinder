@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:edhrec_commander_tinder/widgets/card_display.dart';
+import 'package:edhrec_commander_tinder/widgets/deck_panel.dart';
+import 'package:edhrec_commander_tinder/widgets/stats_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -104,116 +105,148 @@ class FinishedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final deckCtrl = context.watch<DeckController>();
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < 900;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Deck Complete')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Deck Complete'),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Summary', icon: Icon(Icons.info_outline)),
+              Tab(text: 'Deck List', icon: Icon(Icons.list)),
+              Tab(text: 'Stats', icon: Icon(Icons.query_stats)),
+            ],
+          ),
+        ),
+        body: TabBarView(
           children: [
-            Text(
-              'Commander: ${deckCtrl.commander?.cardInfo.name ?? ''}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Icon(Icons.layers, color: Colors.green[700]),
-            const SizedBox(width: 8),
-            Text(
-              '${(deckCtrl.deck.length + deckCtrl.basics.length)} / 99 cards',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 12),
-            SvgPicture.asset(
-              'assets/icons/draft.svg',
-              width: 18,
-              height: 18,
-              colorFilter: ColorFilter.mode(
-                Colors.green[700]!,
-                BlendMode.srcIn,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '\$${deckCtrl.price.toStringAsFixed(2)}',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 12),
-            const SizedBox(height: 24),
-            Wrap(
-              spacing: 12,
-              children: [
-                ElevatedButton(
-                  onPressed: deckCtrl.deck.isEmpty
-                      ? null
-                      : () {
-                          final width = MediaQuery.of(context).size.width;
-                          final isMobile =
-                              width < 900; // same breakpoint used elsewhere
-                          if (isMobile) {
-                            // Mobile: open base sandbox and copy deck list.
-                            final listText = _buildDeckListText(deckCtrl);
-                            Clipboard.setData(ClipboardData(text: listText));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Deck list copied to clipboard.'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                            _launchUrl('https://archidekt.com/sandbox');
-                          } else {
-                            // Desktop: launch fully encoded sandbox URL.
-                            final exportUrl = _buildArchidektSandboxUrl(
-                              deckCtrl,
-                            );
-                            _launchUrl(exportUrl);
-                          }
-                        },
-                  child: const Text('Open in Archidekt'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    deckCtrl.reset();
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (_) => const SplashScreen()),
-                      (route) => false,
-                    );
-                  },
-                  child: const Text('Start Over'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: SizedBox(
-                child: PageView.builder(
-                  itemCount: deckCtrl.deck.length + deckCtrl.basics.length,
-                  controller: PageController(
-                    viewportFraction: MediaQuery.of(context).size.width < 900
-                        ? 0.9
-                        : 0.2,
+            _SummaryPane(
+              deckCtrl: deckCtrl,
+              isMobile: isMobile,
+              onLaunch: (mobile) {
+                if (mobile) {
+                  final listText = _buildDeckListText(deckCtrl);
+                  Clipboard.setData(ClipboardData(text: listText));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Deck list copied to clipboard.'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  _launchUrl('https://archidekt.com/sandbox');
+                } else {
+                  final exportUrl = _buildArchidektSandboxUrl(deckCtrl);
+                  _launchUrl(exportUrl);
+                }
+              },
+              onCopy: () {
+                final listText = _buildDeckListText(deckCtrl);
+                Clipboard.setData(ClipboardData(text: listText));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Deck list copied to clipboard.'),
+                    duration: Duration(seconds: 2),
                   ),
-                  itemBuilder: (_, i) {
-                    final isDeck = i < deckCtrl.deck.length;
-                    final card = isDeck
-                        ? deckCtrl.deck[i]
-                        : deckCtrl.basics[i - deckCtrl.deck.length];
-                    return CardDisplay(card: card);
-                  },
-                ),
-              ),
+                );
+              },
+              onReset: () {
+                deckCtrl.reset();
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SplashScreen()),
+                  (route) => false,
+                );
+              },
+            ),
+            const Padding(padding: EdgeInsets.all(8.0), child: DeckPanel()),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: StatsPanel(deckCtrl: deckCtrl),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SummaryPane extends StatelessWidget {
+  final DeckController deckCtrl;
+  final bool isMobile;
+  final ValueChanged<bool> onLaunch; // param: isMobile
+  final VoidCallback onCopy;
+  final VoidCallback onReset;
+  const _SummaryPane({
+    required this.deckCtrl,
+    required this.isMobile,
+    required this.onLaunch,
+    required this.onCopy,
+    required this.onReset,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            deckCtrl.commander?.cardInfo.name ?? '',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Icon(Icons.layers, color: Colors.green[700]),
+          const SizedBox(width: 8),
+          Text(
+            '${(deckCtrl.deck.length + deckCtrl.basics.length)} / 99 cards',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SvgPicture.asset(
+            'assets/icons/draft.svg',
+            width: 18,
+            height: 18,
+            colorFilter: ColorFilter.mode(Colors.green[700]!, BlendMode.srcIn),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '\$${deckCtrl.price.toStringAsFixed(2)}',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Wrap(
+            spacing: 12,
+            alignment: WrapAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () => onLaunch(isMobile),
+                child: isMobile
+                    ? const Text('Copy + Open Archidekt')
+                    : const Text('Open in Archidekt'),
+              ),
+              ElevatedButton(
+                onPressed: onCopy,
+                child: const Text('Copy Deck List'),
+              ),
+              ElevatedButton(
+                onPressed: onReset,
+                child: const Text('Start Over'),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
