@@ -12,11 +12,11 @@ class CardDisplay extends StatefulWidget {
 }
 
 class _CardDisplayState extends State<CardDisplay> {
-  int _frontIndex = 0;
+  bool flipped = false;
 
   void _cycleFront() {
     setState(() {
-      _frontIndex = (_frontIndex + 1) % widget.card.imageUrls.length;
+      flipped = !flipped;
     });
   }
 
@@ -25,103 +25,36 @@ class _CardDisplayState extends State<CardDisplay> {
     final images = widget.card.imageUrls;
     final label = resolveCardLabel(widget.card);
     final bool hasLabel = label != null;
-    const double offsetStep = 20.0;
 
-    // Single-face card
-    if (images.length == 1) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final maxWidth = constraints.maxWidth.isFinite
-              ? constraints.maxWidth
-              : 300.0;
-          final cardWidth = maxWidth.clamp(180.0, 320.0);
-          final cardHeight =
-              (cardWidth * 1.4) + 4; // maintain same ratio used previously
-          // No extra width: keep image box tight so parent centers naturally.
-          return SizedBox(
-            width: cardWidth,
-            height: cardHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: [
-                _OutlinedCardImage(
-                  url: images.first,
-                  outlineColor: label?.color,
-                  banner: hasLabel
-                      ? _CardBanner(width: cardWidth, label: label)
-                      : null,
+    return Stack(
+      alignment: Alignment.center,
+      clipBehavior: Clip.hardEdge,
+      children: [
+        CardImage(url: flipped ? images.first : images.last),
+        _OutlinedCardImage(
+          url: flipped ? images.last : images.first,
+          outlineColor: label?.color,
+          banner: hasLabel ? _CardBanner(label: label) : null,
+        ),
+        if (images.length > 1)
+          Positioned(
+            right: 4,
+            top: 40,
+            child: Material(
+              color: Colors.black54,
+              shape: const CircleBorder(),
+              child: IconButton(
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(
+                  Icons.flip_camera_android,
+                  color: Colors.white,
                 ),
-              ],
+                tooltip: 'Flip card',
+                onPressed: _cycleFront,
+              ),
             ),
-          );
-        },
-      );
-    }
-
-    // Multi-face card (double-faced / flip / meld etc.)
-    final behindIndices = <int>[];
-    for (int i = 0; i < images.length; i++) {
-      if (i == _frontIndex) continue;
-      behindIndices.add(i);
-      if (behindIndices.length == 3) {
-        break; // cap number behind for visual clarity
-      }
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth.isFinite
-            ? constraints.maxWidth
-            : 300.0;
-        final cardWidth = maxWidth.clamp(180.0, 320.0);
-        final stackWidth = cardWidth + offsetStep * behindIndices.length + 4;
-        final stackHeight =
-            (cardWidth * 1.4) + offsetStep * behindIndices.length + 4;
-        return SizedBox(
-          width: stackWidth,
-          height: stackHeight,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              for (int bi = 0; bi < behindIndices.length; bi++)
-                Positioned(
-                  left: offsetStep * (bi + 1),
-                  top: offsetStep * (bi + 1),
-                  child: Opacity(
-                    opacity: 0.7 - (0.15 * bi),
-                    child: SizedBox(
-                      width: cardWidth,
-                      child: CardImage(url: images[behindIndices[bi]]),
-                    ),
-                  ),
-                ),
-              _OutlinedCardImage(
-                url: images[_frontIndex],
-                outlineColor: label?.color,
-                banner: hasLabel
-                    ? _CardBanner(width: cardWidth, label: label)
-                    : null,
-              ),
-              Positioned(
-                right: 4,
-                top: 4,
-                child: Material(
-                  color: Colors.black54,
-                  shape: const CircleBorder(),
-                  child: IconButton(
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.swap_horiz, color: Colors.white),
-                    tooltip: 'Cycle image',
-                    onPressed: _cycleFront,
-                  ),
-                ),
-              ),
-            ],
           ),
-        );
-      },
+      ],
     );
   }
 }
@@ -161,9 +94,8 @@ class _OutlinedCardImage extends StatelessWidget {
 }
 
 class _CardBanner extends StatelessWidget {
-  final double width;
   final CardLabelDescriptor label;
-  const _CardBanner({required this.width, required this.label});
+  const _CardBanner({required this.label});
 
   @override
   Widget build(BuildContext context) {
