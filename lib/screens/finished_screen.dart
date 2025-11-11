@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:edhrec_commander_tinder/widgets/card_display.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
@@ -58,6 +59,41 @@ class FinishedScreen extends StatelessWidget {
     return 'https://archidekt.com/sandbox?deck=$encoded';
   }
 
+  /// Builds a simple clipboard-friendly list of card counts and names.
+  /// Format:
+  /// 1 Commander Name
+  /// N Card Name
+  /// Includes basics.
+  String _buildDeckListText(DeckController deckCtrl) {
+    final Map<String, int> counts = {};
+    final Map<String, String> nameByUuid = {};
+    final commander = deckCtrl.commander?.cardInfo;
+    if (commander != null) {
+      counts[commander.uuid] = (counts[commander.uuid] ?? 0) + 1;
+      nameByUuid[commander.uuid] = commander.name;
+    }
+    for (final card in deckCtrl.deck) {
+      counts[card.uuid] = (counts[card.uuid] ?? 0) + 1;
+      nameByUuid[card.uuid] = card.name;
+    }
+    for (final card in deckCtrl.basics) {
+      counts[card.uuid] = (counts[card.uuid] ?? 0) + 1;
+      nameByUuid[card.uuid] = card.name;
+    }
+    // Sort by name for stable ordering.
+    final entries = counts.entries.toList()
+      ..sort(
+        (a, b) => nameByUuid[a.key]!.toLowerCase().compareTo(
+          nameByUuid[b.key]!.toLowerCase(),
+        ),
+      );
+    final buffer = StringBuffer();
+    for (final e in entries) {
+      buffer.writeln('${e.value} ${nameByUuid[e.key]}');
+    }
+    return buffer.toString().trim();
+  }
+
   Future<void> _launchUrl(String url) async {
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
@@ -68,7 +104,6 @@ class FinishedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final deckCtrl = context.watch<DeckController>();
-    final exportUrl = _buildArchidektSandboxUrl(deckCtrl);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Deck Complete')),
@@ -119,7 +154,29 @@ class FinishedScreen extends StatelessWidget {
                 ElevatedButton(
                   onPressed: deckCtrl.deck.isEmpty
                       ? null
-                      : () => _launchUrl(exportUrl),
+                      : () {
+                          final width = MediaQuery.of(context).size.width;
+                          final isMobile =
+                              width < 900; // same breakpoint used elsewhere
+                          if (isMobile) {
+                            // Mobile: open base sandbox and copy deck list.
+                            final listText = _buildDeckListText(deckCtrl);
+                            Clipboard.setData(ClipboardData(text: listText));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Deck list copied to clipboard.'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                            _launchUrl('https://archidekt.com/sandbox');
+                          } else {
+                            // Desktop: launch fully encoded sandbox URL.
+                            final exportUrl = _buildArchidektSandboxUrl(
+                              deckCtrl,
+                            );
+                            _launchUrl(exportUrl);
+                          }
+                        },
                   child: const Text('Open in Archidekt'),
                 ),
                 ElevatedButton(
