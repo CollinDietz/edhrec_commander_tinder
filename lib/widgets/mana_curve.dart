@@ -19,10 +19,10 @@ class ManaCurve extends StatelessWidget {
   Widget build(BuildContext context) {
     final buckets = _buildBuckets(cards);
     final total = buckets.fold<int>(0, (p, e) => p + e.count);
-    final nonZero = cards.where((c) => c.mana_cost > 0).toList();
+    final nonZero = cards.where((c) => c.manaCost > 0).toList();
     final double average = nonZero.isEmpty
         ? 0
-        : nonZero.map((c) => c.mana_cost).fold<double>(0, (p, v) => p + v) /
+        : nonZero.map((c) => c.manaCost).fold<double>(0, (p, v) => p + v) /
               nonZero.length;
     final maxCount = buckets
         .map((b) => b.count)
@@ -44,12 +44,12 @@ class ManaCurve extends StatelessWidget {
 
   List<_Bucket> _buildBuckets(List<CardInfo> cards) {
     int c(double minIncl, double maxIncl) => cards
-        .where((c) => c.mana_cost > minIncl && c.mana_cost <= maxIncl)
+        .where((c) => c.manaCost > minIncl && c.manaCost <= maxIncl)
         .length;
     int o(double minExcl, double maxIncl) => cards
-        .where((c) => c.mana_cost > minExcl && c.mana_cost <= maxIncl)
+        .where((c) => c.manaCost > minExcl && c.manaCost <= maxIncl)
         .length;
-    int g(double minExcl) => cards.where((c) => c.mana_cost > minExcl).length;
+    int g(double minExcl) => cards.where((c) => c.manaCost > minExcl).length;
 
     return [
       _Bucket(label: '1', count: c(0, 1)),

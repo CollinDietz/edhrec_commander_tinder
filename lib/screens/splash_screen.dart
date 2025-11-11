@@ -24,6 +24,11 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     _futureCommanders = AllCommanders.load();
+    // Start Tagger loading immediately so tags are more likely to be ready
+    // by the time basics / recommendations are fetched. Safe to access
+    // provider here with listen: false.
+    final deck = Provider.of<DeckController>(context, listen: false);
+    deck.ensureTaggerLoading();
   }
 
   @override
@@ -56,6 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     );
                   } else {
                     _all = snapshot.data ?? [];
+                    // Start tagger loading once commanders are available.
                     child = _LoadedSelectorPanel(
                       all: _all,
                       fieldFocus: _fieldFocus,

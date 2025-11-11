@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
 import 'package:edhrec_commander_tinder/models/recommendation_stats.dart';
+import 'package:edhrec_commander_tinder/models/tagger.dart';
 import 'package:http/http.dart' as http;
 
 class CardStat {
@@ -91,6 +92,7 @@ class Commander {
     return CardInfo.fromUrlAndStats(
       cardStats[index].url,
       cardStats[index].stats,
+      tagger: Tagger.instance,
     );
   }
 }

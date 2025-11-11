@@ -1,5 +1,5 @@
 import 'package:edhrec_commander_tinder/widgets/draft_progress_bar.dart';
-import 'package:edhrec_commander_tinder/widgets/deck_composition_drawer.dart';
+import 'package:edhrec_commander_tinder/widgets/stats_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
@@ -8,6 +8,7 @@ import 'package:swipe_cards/swipe_cards.dart';
 import 'finished_screen.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
 import 'package:edhrec_commander_tinder/widgets/card_with_info.dart';
+import 'package:edhrec_commander_tinder/models/tagger.dart';
 import 'package:edhrec_commander_tinder/widgets/deck_panel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:edhrec_commander_tinder/widgets/swipe_panel.dart';
@@ -26,6 +27,7 @@ class _DraftScreenState extends State<DraftScreen> {
   List<CardInfo?> _resolved = [];
   int _mobileTab = 0; // 0 = draft, 1 = commander, 2 = deck, 3 = composition
   int _currentIndex = 0;
+  bool _tagBackfillScheduled = false;
 
   @override
   void didChangeDependencies() {
@@ -57,6 +59,44 @@ class _DraftScreenState extends State<DraftScreen> {
       });
       _engine = MatchEngine(swipeItems: _items);
       _currentIndex = 0;
+      // If Tagger may still be loading, register a completion hook to backfill tags.
+      final future = deckCtrl.taggerLoadFuture;
+      if (future != null && !Tagger.instance.isLoaded) {
+        future.then((_) {
+          if (!mounted) return;
+          bool changed = false;
+          for (var i = 0; i < _resolved.length; i++) {
+            final c = _resolved[i];
+            if (c != null && c.tags.isEmpty) {
+              final newTags = Tagger.instance.getTags(c.oracleId);
+              if (newTags.isNotEmpty) {
+                _resolved[i] = c.copyWith(tags: newTags);
+                changed = true;
+              }
+            }
+          }
+          if (changed) setState(() {});
+        });
+      }
+    }
+
+    // If Tagger just finished loading, backfill tags for already resolved cards.
+    if (!_tagBackfillScheduled && Tagger.instance.isLoaded) {
+      _tagBackfillScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        bool changed = false;
+        for (var i = 0; i < _resolved.length; i++) {
+          final c = _resolved[i];
+          if (c != null && c.tags.isEmpty) {
+            final newTags = Tagger.instance.getTags(c.oracleId);
+            if (newTags.isNotEmpty) {
+              _resolved[i] = c.copyWith(tags: newTags);
+              changed = true;
+            }
+          }
+        }
+        if (changed && mounted) setState(() {});
+      });
     }
   }
 
@@ -102,7 +142,7 @@ class _DraftScreenState extends State<DraftScreen> {
                 const DraftProgressBar(),
                 Expanded(
                   child: _mobileTab == 3
-                      ? DeckCompositionDrawer(deckCtrl: deckCtrl)
+                      ? StatsPanel(deckCtrl: deckCtrl)
                       : const DeckPanel(),
                 ),
               ],
@@ -164,7 +204,7 @@ class _DraftScreenState extends State<DraftScreen> {
       case 2:
         return const DeckPanel();
       case 3:
-        return DeckCompositionDrawer(deckCtrl: deckCtrl);
+        return StatsPanel(deckCtrl: deckCtrl);
       default:
         // Draft swipe view
         return SwipePanel(

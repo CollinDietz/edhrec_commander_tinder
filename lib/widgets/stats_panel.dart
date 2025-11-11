@@ -1,13 +1,14 @@
 import 'package:edhrec_commander_tinder/widgets/categories_progress.dart';
 import 'package:edhrec_commander_tinder/widgets/mana_curve.dart';
+import 'package:edhrec_commander_tinder/widgets/tags_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
 
-class DeckCompositionDrawer extends StatelessWidget {
+class StatsPanel extends StatelessWidget {
   final DeckController deckCtrl;
-  const DeckCompositionDrawer({super.key, required this.deckCtrl});
+  const StatsPanel({super.key, required this.deckCtrl});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +28,13 @@ class DeckCompositionDrawer extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             children: [
               _Section(
-                title: 'Type Spread',
+                title: "Tags",
+                subtitle: "Counts of cards in important tags",
+                child: TagsProgress(cards: cards),
+              ),
+              const SizedBox(height: 20),
+              _Section(
+                title: 'Type',
                 subtitle: 'Counts of cards in each primary type',
                 child: CategoriesProgress(cards: cards),
               ),

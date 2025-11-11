@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:edhrec_commander_tinder/models/commander.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
+import 'package:edhrec_commander_tinder/models/tagger.dart';
 
 class DeckController extends ChangeNotifier {
   String? _commanderUrl;
@@ -9,6 +10,7 @@ class DeckController extends ChangeNotifier {
   final List<CardInfo> _basics = [];
   bool _loadingCommander = false;
   Object? _loadError;
+  Future<void>? _taggerLoadFuture; // lazily started tagger loading future
 
   String? get commanderUrl => _commanderUrl;
   Commander? get commander => _commander;
@@ -26,6 +28,12 @@ class DeckController extends ChangeNotifier {
 
   bool get loadingCommander => _loadingCommander;
   Object? get loadError => _loadError;
+  Future<void>? get taggerLoadFuture => _taggerLoadFuture;
+
+  /// Begin loading the Tagger data in the background (idempotent).
+  void ensureTaggerLoading() {
+    _taggerLoadFuture ??= Tagger.instance.load();
+  }
 
   void setCommanderUrl(String url) {
     final commanderId = url.trim().replaceFirst(
@@ -54,7 +62,12 @@ class DeckController extends ChangeNotifier {
 
       final futures = urls.map((u) async {
         try {
-          return await CardInfo.fromUrlAndStats(u, null);
+          // Pass Tagger instance so CardInfo can attach tags if already loaded.
+          return await CardInfo.fromUrlAndStats(
+            u,
+            null,
+            tagger: Tagger.instance,
+          );
         } catch (_) {
           return null;
         }
@@ -84,6 +97,17 @@ class DeckController extends ChangeNotifier {
       _basics.removeLast();
     }
     _deck.add(card);
+
+    final tags = <String>{};
+    for (final c in _deck) {
+      final t = (c.tags);
+      tags.addAll(t);
+    }
+    if (_deck.length == 85) {
+      for (final tag in tags) {
+        debugPrint(tag);
+      }
+    }
     notifyListeners();
   }
 
