@@ -3,10 +3,23 @@ import 'package:edhrec_commander_tinder/models/card_info.dart';
 import 'package:edhrec_commander_tinder/models/recommendation_stats.dart';
 import 'package:http/http.dart' as http;
 
+class CardStat {
+  final String url;
+  final RecommendationStats stats;
+  const CardStat({required this.url, required this.stats});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is CardStat && other.url == url;
+
+  @override
+  int get hashCode => url.hashCode;
+}
+
 class Commander {
   final CardInfo cardInfo;
   final List<String> basicsUrls;
-  final List<({String url, RecommendationStats stats})> cardStats;
+  final List<CardStat> cardStats;
 
   static const List<String> basics = [
     "c44f81ca-f72f-445c-8901-3a894a2a47f9", // Mountain
@@ -25,7 +38,7 @@ class Commander {
   factory Commander.fromJson(Map<String, dynamic> json) {
     final List<dynamic> cardLists = json['container']['json_dict']['cardlists'];
 
-    final List<({String url, RecommendationStats stats})> stats = [];
+    final Set<CardStat> uniqueCards = {};
     final List<String> basicsUrl = [];
     for (final Map<String, dynamic> cardList in cardLists) {
       for (final Map<String, dynamic> card in cardList['cardviews']) {
@@ -38,25 +51,29 @@ class Commander {
         if (basics.contains(id)) {
           basicsUrl.add(url);
         } else {
-          stats.add((
-            url: url,
-            stats: RecommendationStats(
-              inclusion: inclusion,
-              potentialDecks: potentialDecks,
+          uniqueCards.add(
+            CardStat(
+              url: url,
+              stats: RecommendationStats(
+                inclusion: inclusion,
+                potentialDecks: potentialDecks,
+              ),
             ),
-          ));
+          );
         }
       }
     }
 
-    stats.sort((a, b) => b.stats.ratio.compareTo(a.stats.ratio));
+    final List<CardStat> allCards = uniqueCards.toList();
+
+    allCards.sort((a, b) => b.stats.ratio.compareTo(a.stats.ratio));
 
     final CardInfo cardInfo = CardInfo.fromJsonAndStats(json, null, null);
 
     return Commander(
       cardInfo: cardInfo,
       basicsUrls: basicsUrl,
-      cardStats: stats,
+      cardStats: allCards,
     );
   }
 

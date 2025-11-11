@@ -78,7 +78,7 @@ class CardInfo {
     final id = edhrecJsonData['container']['json_dict']['card']['id'];
 
     final scryfallResponse = await http.get(
-      Uri.parse('https://api.scryfall.com/cards/${id}'),
+      Uri.parse('https://api.scryfall.com/cards/$id'),
     );
 
     if (scryfallResponse.statusCode != 200) {

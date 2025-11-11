@@ -16,11 +16,11 @@ class DeckPanel extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: label!.color,
+          color: label.color,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
-          label!.shortText,
+          label.shortText,
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,

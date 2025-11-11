@@ -64,8 +64,9 @@ class _CardDisplayState extends State<CardDisplay> {
     for (int i = 0; i < images.length; i++) {
       if (i == _frontIndex) continue;
       behindIndices.add(i);
-      if (behindIndices.length == 3)
+      if (behindIndices.length == 3) {
         break; // cap number behind for visual clarity
+      }
     }
 
     return LayoutBuilder(

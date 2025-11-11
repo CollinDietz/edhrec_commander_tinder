@@ -19,7 +19,6 @@ class PotentialCommander {
     } else if (json['card_faces'] != null) {
       picture = json['card_faces'][0]['image_uris']['art_crop'];
     }
-    ;
 
     return PotentialCommander(
       name: json['name'],

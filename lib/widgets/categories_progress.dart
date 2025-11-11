@@ -85,9 +85,8 @@ class _CategoryProgress extends StatelessWidget {
             child: LinearProgressIndicator(
               minHeight: 8,
               value: (count / total).clamp(0, 1),
-              backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(
-                0.4,
-              ),
+              backgroundColor: theme.colorScheme.surfaceContainerHighest
+                  .withOpacity(0.4),
               valueColor: AlwaysStoppedAnimation(color),
             ),
           ),

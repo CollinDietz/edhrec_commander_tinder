@@ -13,7 +13,7 @@ const categoryColors = <String, Color>{
 class CategoryTile extends StatelessWidget {
   final String category;
   final Widget child;
-  const CategoryTile({required this.child, required this.category});
+  const CategoryTile({super.key, required this.child, required this.category});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class CategoryTile extends StatelessWidget {
 
     return ListTile(
       title: child,
-      tileColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+      tileColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
       shape: RoundedRectangleBorder(
         side: BorderSide(
           color: categoryColors[category]!.withOpacity(1),

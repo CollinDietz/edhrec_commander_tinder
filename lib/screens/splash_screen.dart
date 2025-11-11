@@ -209,9 +209,8 @@ class _LoadingSplashState extends State<_LoadingSplash>
             width: 220,
             child: LinearProgressIndicator(
               minHeight: 6,
-              backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(
-                0.3,
-              ),
+              backgroundColor: theme.colorScheme.surfaceContainerHighest
+                  .withOpacity(0.3),
             ),
           ),
           const SizedBox(height: 24),

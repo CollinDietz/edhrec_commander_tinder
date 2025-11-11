@@ -126,7 +126,7 @@ class _BucketRow extends StatelessWidget {
                   LinearProgressIndicator(
                     minHeight: barHeight,
                     value: fraction,
-                    backgroundColor: theme.colorScheme.surfaceVariant
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest
                         .withOpacity(0.4),
                     valueColor: AlwaysStoppedAnimation(
                       // Preserve slight gradient feel by tweaking opacity if desired.
