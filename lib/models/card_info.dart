@@ -48,7 +48,7 @@ class CardInfo {
 
     final bool isGameChange = scryfallJson != null
         ? scryfallJson['game_changer']
-        : false;
+        : true;
 
     return CardInfo(
       name: cardJson['name'] as String,

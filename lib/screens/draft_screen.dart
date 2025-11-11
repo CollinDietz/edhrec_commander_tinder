@@ -209,7 +209,7 @@ class CommanderCardPanel extends StatelessWidget {
         final scale = scaleW < scaleH ? scaleW : scaleH;
 
         // Clamp scale to not blow up excessively.
-        final appliedScale = scale.clamp(0.2, 1.0);
+        final appliedScale = scale.clamp(0.1, 1.0);
 
         return Center(
           child: Transform.scale(

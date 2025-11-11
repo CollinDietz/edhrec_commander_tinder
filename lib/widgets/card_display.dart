@@ -47,15 +47,11 @@ class _CardDisplayState extends State<CardDisplay> {
               children: [
                 _OutlinedCardImage(
                   url: images.first,
-                  width: cardWidth,
                   outlineColor: label?.color,
+                  banner: hasLabel
+                      ? _CardBanner(width: cardWidth, label: label)
+                      : null,
                 ),
-                if (hasLabel)
-                  Positioned(
-                    top: -16,
-                    left: 0,
-                    child: _CardBanner(width: cardWidth, label: label),
-                  ),
               ],
             ),
           );
@@ -86,6 +82,7 @@ class _CardDisplayState extends State<CardDisplay> {
           height: stackHeight,
           child: Stack(
             clipBehavior: Clip.none,
+            alignment: Alignment.center,
             children: [
               for (int bi = 0; bi < behindIndices.length; bi++)
                 Positioned(
@@ -101,8 +98,10 @@ class _CardDisplayState extends State<CardDisplay> {
                 ),
               _OutlinedCardImage(
                 url: images[_frontIndex],
-                width: cardWidth,
                 outlineColor: label?.color,
+                banner: hasLabel
+                    ? _CardBanner(width: cardWidth, label: label)
+                    : null,
               ),
               Positioned(
                 right: 4,
@@ -118,12 +117,6 @@ class _CardDisplayState extends State<CardDisplay> {
                   ),
                 ),
               ),
-              if (hasLabel)
-                Positioned(
-                  top: -16,
-                  left: 0,
-                  child: _CardBanner(width: cardWidth, label: label),
-                ),
             ],
           ),
         );
@@ -135,34 +128,33 @@ class _CardDisplayState extends State<CardDisplay> {
 /// Card image with optional colored outline based on label.
 class _OutlinedCardImage extends StatelessWidget {
   final String url;
-  final double width;
   final Color? outlineColor;
+  final _CardBanner? banner;
   const _OutlinedCardImage({
     required this.url,
-    required this.width,
     required this.outlineColor,
+    required this.banner,
   });
 
   @override
   Widget build(BuildContext context) {
-    final borderRadius = BorderRadius.circular(12);
-    final image = SizedBox(
-      width: width,
-      child: CardImage(url: url),
-    );
-    if (outlineColor == null) {
-      return ClipRRect(borderRadius: borderRadius, child: image);
-    }
-    return Container(
-      width: width,
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        border: Border.all(color: outlineColor!, width: 3),
-        boxShadow: const [
-          BoxShadow(color: Colors.black45, blurRadius: 8, spreadRadius: 2),
-        ],
-      ),
-      child: ClipRRect(borderRadius: borderRadius, child: image),
+    return Stack(
+      alignment: Alignment.topLeft,
+      children: [
+        Container(
+          foregroundDecoration: outlineColor != null
+              ? BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: outlineColor!, width: 4),
+                )
+              : null,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: CardImage(url: url),
+          ),
+        ),
+        if (banner != null) banner!,
+      ],
     );
   }
 }
@@ -175,13 +167,13 @@ class _CardBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: width * 0.7,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
         color: label.color,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(8),
-          topRight: Radius.circular(8),
+          // topRight: Radius.circular(8),
+          // bottomLeft: Radius.circular(8),
           bottomRight: Radius.circular(8),
         ),
         boxShadow: const [
@@ -191,6 +183,7 @@ class _CardBanner extends StatelessWidget {
       child: Text(
         label.text,
         style: const TextStyle(
+          fontSize: 10,
           color: Colors.white,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
