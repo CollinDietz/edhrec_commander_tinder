@@ -24,7 +24,7 @@ class _DraftScreenState extends State<DraftScreen> {
   List<SwipeItem> _items = [];
   List<Future<CardInfo>?> _futures = [];
   List<CardInfo?> _resolved = [];
-  int _mobileTab = 0; // 0 = draft, 1 = commander, 2 = deck
+  int _mobileTab = 0; // 0 = draft, 1 = commander, 2 = deck, 3 = composition
   int _currentIndex = 0;
 
   @override
@@ -76,7 +76,6 @@ class _DraftScreenState extends State<DraftScreen> {
 
   Widget _buildDesktopLayout(DeckController deckCtrl, Commander commander) {
     return Scaffold(
-      endDrawer: DeckCompositionDrawer(deckCtrl: deckCtrl),
       body: Row(
         children: [
           const Expanded(child: CommanderCardPanel()),
@@ -97,11 +96,15 @@ class _DraftScreenState extends State<DraftScreen> {
               currentIndex: _currentIndex,
             ),
           ),
-          const Expanded(
+          Expanded(
             child: Column(
               children: [
-                DraftProgressBar(),
-                Expanded(child: DeckPanel()),
+                const DraftProgressBar(),
+                Expanded(
+                  child: _mobileTab == 3
+                      ? DeckCompositionDrawer(deckCtrl: deckCtrl)
+                      : const DeckPanel(),
+                ),
               ],
             ),
           ),
@@ -118,11 +121,11 @@ class _DraftScreenState extends State<DraftScreen> {
           child: DraftProgressBar(),
         ),
       ),
-      drawer: DeckCompositionDrawer(deckCtrl: deckCtrl),
       body: _buildMobileContent(deckCtrl, commander),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _mobileTab,
         onTap: (i) => setState(() => _mobileTab = i),
+        type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(
             icon: SvgPicture.asset(
@@ -144,6 +147,10 @@ class _DraftScreenState extends State<DraftScreen> {
             icon: Icon(Icons.layers),
             label: 'Deck',
           ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.query_stats),
+            label: 'Stats',
+          ),
         ],
       ),
     );
@@ -155,8 +162,9 @@ class _DraftScreenState extends State<DraftScreen> {
         // Commander view
         return CommanderCardPanel();
       case 2:
-        // Deck list view
         return const DeckPanel();
+      case 3:
+        return DeckCompositionDrawer(deckCtrl: deckCtrl);
       default:
         // Draft swipe view
         return SwipePanel(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
 import 'package:edhrec_commander_tinder/widgets/card_image.dart';
+import 'package:edhrec_commander_tinder/widgets/card_labels.dart';
 
 class CardDisplay extends StatefulWidget {
   final CardInfo card;
@@ -22,46 +23,61 @@ class _CardDisplayState extends State<CardDisplay> {
   @override
   Widget build(BuildContext context) {
     final images = widget.card.imageUrls;
-
+    final label = resolveCardLabel(widget.card);
+    final bool hasLabel = label != null;
     const double offsetStep = 20.0;
 
+    // Single-face card
     if (images.length == 1) {
-      // Use LayoutBuilder so single-image cards occupy the same max horizontal
-      // space the stacked variant would (avoids layout shift when counts vary).
-      const int assumedBehind = 1; // reserve space as if 3 behind cards existed
       return LayoutBuilder(
         builder: (context, constraints) {
           final maxWidth = constraints.maxWidth.isFinite
               ? constraints.maxWidth
               : 300.0;
           final cardWidth = maxWidth.clamp(180.0, 320.0);
-          final stackWidth = cardWidth + offsetStep * assumedBehind + 4;
-          final stackHeight =
-              (cardWidth * 1.4) + offsetStep * assumedBehind + 4;
+          final cardHeight =
+              (cardWidth * 1.4) + 4; // maintain same ratio used previously
+          // No extra width: keep image box tight so parent centers naturally.
           return SizedBox(
-            width: stackWidth,
-            height: stackHeight,
-            child: CardImage(url: images.first),
+            width: cardWidth,
+            height: cardHeight,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                _OutlinedCardImage(
+                  url: images.first,
+                  width: cardWidth,
+                  outlineColor: label?.color,
+                ),
+                if (hasLabel)
+                  Positioned(
+                    top: -16,
+                    left: 0,
+                    child: _CardBanner(width: cardWidth, label: label),
+                  ),
+              ],
+            ),
           );
         },
       );
     }
 
+    // Multi-face card (double-faced / flip / meld etc.)
     final behindIndices = <int>[];
     for (int i = 0; i < images.length; i++) {
       if (i == _frontIndex) continue;
       behindIndices.add(i);
-      if (behindIndices.length == 3) break; // cap number of behind cards
+      if (behindIndices.length == 3)
+        break; // cap number behind for visual clarity
     }
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Derive card width from available width with a sane max.
         final maxWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
-            : 300.0; // fallback if unconstrained
+            : 300.0;
         final cardWidth = maxWidth.clamp(180.0, 320.0);
-        // Reserve space based on actual behind count.
         final stackWidth = cardWidth + offsetStep * behindIndices.length + 4;
         final stackHeight =
             (cardWidth * 1.4) + offsetStep * behindIndices.length + 4;
@@ -83,12 +99,11 @@ class _CardDisplayState extends State<CardDisplay> {
                     ),
                   ),
                 ),
-              // Front image
-              SizedBox(
+              _OutlinedCardImage(
+                url: images[_frontIndex],
                 width: cardWidth,
-                child: CardImage(url: images[_frontIndex]),
+                outlineColor: label?.color,
               ),
-              // Swap button overlay (position relative to front card)
               Positioned(
                 right: 4,
                 top: 4,
@@ -103,6 +118,12 @@ class _CardDisplayState extends State<CardDisplay> {
                   ),
                 ),
               ),
+              if (hasLabel)
+                Positioned(
+                  top: -16,
+                  left: 0,
+                  child: _CardBanner(width: cardWidth, label: label),
+                ),
             ],
           ),
         );
@@ -111,4 +132,70 @@ class _CardDisplayState extends State<CardDisplay> {
   }
 }
 
-// End of file
+/// Card image with optional colored outline based on label.
+class _OutlinedCardImage extends StatelessWidget {
+  final String url;
+  final double width;
+  final Color? outlineColor;
+  const _OutlinedCardImage({
+    required this.url,
+    required this.width,
+    required this.outlineColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(12);
+    final image = SizedBox(
+      width: width,
+      child: CardImage(url: url),
+    );
+    if (outlineColor == null) {
+      return ClipRRect(borderRadius: borderRadius, child: image);
+    }
+    return Container(
+      width: width,
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        border: Border.all(color: outlineColor!, width: 3),
+        boxShadow: const [
+          BoxShadow(color: Colors.black45, blurRadius: 8, spreadRadius: 2),
+        ],
+      ),
+      child: ClipRRect(borderRadius: borderRadius, child: image),
+    );
+  }
+}
+
+class _CardBanner extends StatelessWidget {
+  final double width;
+  final CardLabelDescriptor label;
+  const _CardBanner({required this.width, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width * 0.7,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: label.color,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(8),
+          topRight: Radius.circular(8),
+          bottomRight: Radius.circular(8),
+        ),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 3)),
+        ],
+      ),
+      child: Text(
+        label.text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+}

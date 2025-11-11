@@ -10,6 +10,8 @@ class CardInfo {
   final List<String> smallImageUrls;
   final String uuid;
   final double price;
+  final double mana_cost;
+  final bool isSalty;
   final bool isGameChanger;
   final RecommendationStats? stats;
 
@@ -20,6 +22,8 @@ class CardInfo {
     required this.imageUrls,
     required this.smallImageUrls,
     required this.price,
+    required this.mana_cost,
+    required this.isSalty,
     required this.stats,
     required this.isGameChanger,
   });
@@ -50,6 +54,8 @@ class CardInfo {
       name: cardJson['name'] as String,
       type: cardJson['primary_type'] as String,
       uuid: cardJson['id'] as String,
+      mana_cost: cardJson['cmc'] as double,
+      isSalty: cardJson['salt'] as double > 1.0,
       price: cardJson['prices']['tcgplayer']['price'] as double,
       imageUrls: normalImages,
       smallImageUrls: artCropImages,

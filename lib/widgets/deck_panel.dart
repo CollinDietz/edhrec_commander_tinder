@@ -1,4 +1,5 @@
 import 'package:edhrec_commander_tinder/models/card_info.dart';
+import 'package:edhrec_commander_tinder/widgets/card_labels.dart';
 import 'package:edhrec_commander_tinder/widgets/category_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,13 +10,28 @@ import 'card_popup.dart';
 class DeckPanel extends StatelessWidget {
   const DeckPanel({super.key});
 
-  // Widget _basicCountBadge(List<CardInfo> basics, CardInfo card) {
-  //   final count = ;
-  //   return Text(
-  //     'x $count',
-  //     style: const TextStyle(fontWeight: FontWeight.w600),
-  //   );
-  // }
+  Widget _labelBadge(CardLabelDescriptor label) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: label!.color,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          label!.shortText,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +60,9 @@ class DeckPanel extends StatelessWidget {
               if (isBasic) {
                 text = "$text x$count";
               }
+
+              CardLabelDescriptor? label = resolveCardLabel(card);
+              bool labeled = label != null;
 
               return GestureDetector(
                 onTap: () {
@@ -82,6 +101,7 @@ class DeckPanel extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if (labeled) _labelBadge(label),
                       const SizedBox(width: 16),
                       CostLabel(cost: card.price),
                     ],
