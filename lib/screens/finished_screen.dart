@@ -70,7 +70,7 @@ class FinishedScreen extends StatelessWidget {
     final commander = deckCtrl.commander?.cardInfo;
     if (commander != null) {
       counts[commander.uuid] = (counts[commander.uuid] ?? 0) + 1;
-      nameByUuid[commander.uuid] = commander.name;
+      nameByUuid[commander.uuid] = "${commander.name} [Commander]";
     }
     for (final card in deckCtrl.deck) {
       counts[card.uuid] = (counts[card.uuid] ?? 0) + 1;

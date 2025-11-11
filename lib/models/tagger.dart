@@ -29,7 +29,6 @@ class Tagger {
 
   Future<void> load() async {
     if (_loaded) return;
-    print("loading");
     final resp = await http.get(Uri.parse(_url));
     if (resp.statusCode != 200) {
       throw Exception('Failed to load tags: ${resp.statusCode}');
@@ -44,7 +43,6 @@ class Tagger {
           .toList();
     }
     _loaded = true;
-    print("loaded");
   }
 
   /// Returns list of tag labels for the given card. Call load() first.
