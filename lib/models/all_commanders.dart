@@ -12,6 +12,86 @@ class PotentialCommander {
     required this.picture,
   });
 
+  static String _slugifyCommanderName(String raw) {
+    var s = raw.replaceAll('+', ' ');
+    s = s.toLowerCase();
+    // Normalize diacritics to ASCII. We remove combining marks after NFD and also
+    // map certain multi-char ligatures.
+    // Dart (without third-party) doesn't have direct unicode normalization, but for
+    // common commander-name characters we can transliterate via map.
+    const multiMap = {
+      'æ': 'ae',
+      'œ': 'oe',
+      'ß': 'ss',
+      'ø': 'o',
+      'ð': 'd',
+      'þ': 'th',
+      'å': 'a',
+    };
+    const singleMap = {
+      'á': 'a',
+      'à': 'a',
+      'â': 'a',
+      'ä': 'a',
+      'ã': 'a',
+      'å': 'a',
+      'ā': 'a',
+      'é': 'e',
+      'è': 'e',
+      'ê': 'e',
+      'ë': 'e',
+      'ė': 'e',
+      'ę': 'e',
+      'ē': 'e',
+      'í': 'i',
+      'ì': 'i',
+      'î': 'i',
+      'ï': 'i',
+      'ī': 'i',
+      'ó': 'o',
+      'ò': 'o',
+      'ô': 'o',
+      'ö': 'o',
+      'õ': 'o',
+      'ő': 'o',
+      'ō': 'o',
+      'ú': 'u',
+      'ù': 'u',
+      'û': 'u',
+      'ü': 'u',
+      'ű': 'u',
+      'ū': 'u',
+      'ý': 'y',
+      'ÿ': 'y',
+      'ç': 'c',
+      'ñ': 'n',
+    };
+    final buffer = StringBuffer();
+    for (final r in s.runes) {
+      final ch = String.fromCharCode(r);
+      if (multiMap.containsKey(ch)) {
+        buffer.write(multiMap[ch]);
+      } else if (singleMap.containsKey(ch)) {
+        buffer.write(singleMap[ch]);
+      } else {
+        buffer.write(ch);
+      }
+    }
+    s = buffer.toString();
+    // Remove standard colon and modifier letter colon (U+A789) without creating word breaks.
+    s = s.replaceAll(RegExp(r'[:꞉]'), '');
+    // Remove apostrophes/backticks
+    s = s.replaceAll(RegExp(r"['`]"), "");
+    // Replace any remaining non-alphanumeric (except space & hyphen) with space
+    s = s.replaceAll(RegExp(r"[^a-z0-9\s-]"), " ");
+    // Collapse whitespace
+    s = s.replaceAll(RegExp(r"\s+"), " ").trim();
+    s = s.replaceAll(' ', '-');
+    // Collapse multiple hyphens
+    s = s.replaceAll(RegExp(r"-+"), "-");
+    return s;
+  }
+
   factory PotentialCommander.fromJson(Map<String, dynamic> json) {
     String? picture;
     if (json['image_uris'] != null) {
@@ -22,7 +102,8 @@ class PotentialCommander {
 
     return PotentialCommander(
       name: json['name'],
-      url: json['related_uris']['edhrec'],
+      url:
+          'https://json.edhrec.com/pages/commanders/${_slugifyCommanderName(json['name'])}.json',
       picture: picture,
     );
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
 import 'draft_screen.dart';
@@ -86,10 +85,7 @@ class _SplashScreenState extends State<SplashScreen> {
                           return;
                         }
                         setState(() => _error = null);
-                        final resolved = await _resolveEdhrecUrl(
-                          _selected!.url,
-                        );
-                        deck.setCommanderUrl(resolved);
+                        deck.setCommanderUrl(_selected!.url);
                         final navigator = Navigator.of(context);
                         await deck.loadCommander();
                         if (deck.loadError != null) {
@@ -470,116 +466,4 @@ class _SurfacePanel extends StatelessWidget {
       child: child,
     );
   }
-}
-
-/// Performs a HEAD/GET request to the EDHREC route endpoint without following redirects
-/// and extracts the canonical commanders/<slug> URL from the HTML body.
-Future<String> _resolveEdhrecUrl(String routeUrl) async {
-  final uri = Uri.parse(routeUrl);
-  // If already canonical just return.
-  if (uri.path.contains('/commanders/')) return routeUrl;
-  try {
-    final resp = await http.get(
-      uri,
-      headers: {'User-Agent': 'CommanderTinder/1.0 (Flutter)'},
-    );
-    // http automatically follows redirects; check final request URL.
-    final finalUrl = resp.request?.url;
-    if (finalUrl != null && finalUrl.path.contains('/commanders/')) {
-      return 'https://edhrec.com${finalUrl.path}';
-    }
-    // If not redirected, attempt slugify from cc query param.
-    final cc = uri.queryParameters['cc'];
-    if (cc != null && cc.isNotEmpty) {
-      final slug = _slugifyCommanderName(cc);
-      return 'https://edhrec.com/commanders/$slug';
-    }
-    return routeUrl;
-  } catch (_) {
-    // Graceful fallback.
-    final cc = uri.queryParameters['cc'];
-    if (cc != null && cc.isNotEmpty) {
-      final slug = _slugifyCommanderName(cc);
-      return 'https://edhrec.com/commanders/$slug';
-    }
-    return routeUrl;
-  }
-}
-
-String _slugifyCommanderName(String raw) {
-  var s = raw.replaceAll('+', ' ');
-  s = s.toLowerCase();
-  // Normalize diacritics to ASCII. We remove combining marks after NFD and also
-  // map certain multi-char ligatures.
-  // Dart (without third-party) doesn't have direct unicode normalization, but for
-  // common commander-name characters we can transliterate via map.
-  const multiMap = {
-    'æ': 'ae',
-    'œ': 'oe',
-    'ß': 'ss',
-    'ø': 'o',
-    'ð': 'd',
-    'þ': 'th',
-    'å': 'a',
-  };
-  const singleMap = {
-    'á': 'a',
-    'à': 'a',
-    'â': 'a',
-    'ä': 'a',
-    'ã': 'a',
-    'å': 'a',
-    'ā': 'a',
-    'é': 'e',
-    'è': 'e',
-    'ê': 'e',
-    'ë': 'e',
-    'ė': 'e',
-    'ę': 'e',
-    'ē': 'e',
-    'í': 'i',
-    'ì': 'i',
-    'î': 'i',
-    'ï': 'i',
-    'ī': 'i',
-    'ó': 'o',
-    'ò': 'o',
-    'ô': 'o',
-    'ö': 'o',
-    'õ': 'o',
-    'ő': 'o',
-    'ō': 'o',
-    'ú': 'u',
-    'ù': 'u',
-    'û': 'u',
-    'ü': 'u',
-    'ű': 'u',
-    'ū': 'u',
-    'ý': 'y',
-    'ÿ': 'y',
-    'ç': 'c',
-    'ñ': 'n',
-  };
-  final buffer = StringBuffer();
-  for (final r in s.runes) {
-    final ch = String.fromCharCode(r);
-    if (multiMap.containsKey(ch)) {
-      buffer.write(multiMap[ch]);
-    } else if (singleMap.containsKey(ch)) {
-      buffer.write(singleMap[ch]);
-    } else {
-      buffer.write(ch);
-    }
-  }
-  s = buffer.toString();
-  // Remove apostrophes/backticks
-  s = s.replaceAll(RegExp(r"['`]"), "");
-  // Replace any remaining non-alphanumeric (except space & hyphen) with space
-  s = s.replaceAll(RegExp(r"[^a-z0-9\s-]"), " ");
-  // Collapse whitespace
-  s = s.replaceAll(RegExp(r"\s+"), " ").trim();
-  s = s.replaceAll(' ', '-');
-  // Collapse multiple hyphens
-  s = s.replaceAll(RegExp(r"-+"), "-");
-  return s;
 }
