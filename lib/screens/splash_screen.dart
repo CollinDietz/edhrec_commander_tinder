@@ -89,6 +89,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         final navigator = Navigator.of(context);
                         await deck.loadCommander();
                         if (deck.loadError != null) {
+                          print(deck.loadError);
                           if (!mounted) return;
                           setState(() => _error = 'Failed to load commander');
                           return;

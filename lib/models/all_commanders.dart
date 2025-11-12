@@ -13,6 +13,10 @@ class PotentialCommander {
   });
 
   static String _slugifyCommanderName(String raw) {
+    // For split / dual-face names like "Gwen Stacy // Ghost Spider" only use the first part.
+    if (raw.contains('//')) {
+      raw = raw.split('//')[0].trim();
+    }
     var s = raw.replaceAll('+', ' ');
     s = s.toLowerCase();
     // Normalize diacritics to ASCII. We remove combining marks after NFD and also
