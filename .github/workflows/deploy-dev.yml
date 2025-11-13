@@ -33,3 +33,4 @@ jobs:
           publish_branch: gh-pages
           publish_dir: build/web
           destination_dir: dev
+          keep_files: true
