@@ -1,23 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:edhrec_commander_tinder/screens/finished_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
 
 class FinishButton extends StatelessWidget {
-  const FinishButton({super.key});
+  final bool compact;
+  const FinishButton({super.key, this.compact = true});
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        visualDensity: VisualDensity.compact,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        minimumSize: const Size(64, 32),
-        textStyle: const TextStyle(fontSize: 12),
+    final deckCtrl = context.watch<DeckController>();
+    final cs = Theme.of(context).colorScheme;
+
+    return Tooltip(
+      message: 'Finish drafting and view deck summary',
+      child: ElevatedButton.icon(
+        icon: Icon(Icons.flag, size: compact ? 16 : 18, color: cs.onPrimary),
+        label: Text(
+          'Finish',
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: cs.onPrimary,
+            fontSize: compact ? 12 : null,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          visualDensity: compact
+              ? VisualDensity.compact
+              : VisualDensity.standard,
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 10 : 16,
+            vertical: compact ? 6 : 10,
+          ),
+          minimumSize: compact ? const Size(72, 34) : const Size(96, 40),
+          backgroundColor: cs.primary,
+          foregroundColor: cs.onPrimary,
+          disabledBackgroundColor: cs.surfaceVariant,
+          disabledForegroundColor: cs.onSurfaceVariant,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        onPressed: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const FinishedScreen()),
+        ),
       ),
-      onPressed: () => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const FinishedScreen()),
-      ),
-      child: const Text('Finish'),
     );
   }
 }

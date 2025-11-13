@@ -43,19 +43,8 @@ class TagAnnotation {
   int countIn(Iterable<CardInfo> cards) => cards.where(matches).length;
 }
 
-const tagCounts = [
-  TagAnnotation(tag: 'card-advantage', targetCount: 12, color: Colors.indigo),
-  TagAnnotation(
-    tag: 'removal OR counterspell',
-    targetCount: 12,
-    color: Colors.deepOrange,
-  ),
-  TagAnnotation(tag: 'ramp', targetCount: 10, color: Colors.green),
-  TagAnnotation(tag: 'life-gain', targetCount: 3, color: Colors.pinkAccent),
-  TagAnnotation(tag: 'protects-', targetCount: 3, color: Colors.amber),
-  TagAnnotation(tag: 'recursion', targetCount: 3, color: Colors.teal),
-  TagAnnotation(tag: 'sweeper', targetCount: 3, color: Colors.black87),
-];
+// NOTE: We derive colors from the active theme inline (not a global const) to keep
+// color selection colocated with tag definitions.
 
 class TagsProgress extends StatelessWidget {
   final List<CardInfo> cards;
@@ -63,19 +52,43 @@ class TagsProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     // If tagger not yet loaded show a compact progress indicator.
     if (!Tagger.instance.isLoaded) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           child: SizedBox(
             width: 28,
             height: 28,
-            child: CircularProgressIndicator(strokeWidth: 3),
+            child: CircularProgressIndicator(strokeWidth: 3, color: cs.primary),
           ),
         ),
       );
     }
+
+    // Inline tag array with themed colors.
+    final tagCounts = [
+      TagAnnotation(tag: 'card-advantage', targetCount: 12, color: cs.primary),
+      TagAnnotation(
+        tag: 'removal OR counterspell',
+        targetCount: 12,
+        color: cs.error,
+      ),
+      TagAnnotation(tag: 'ramp', targetCount: 10, color: cs.secondary),
+      TagAnnotation(tag: 'life-gain', targetCount: 3, color: cs.tertiary),
+      TagAnnotation(
+        tag: 'protects-',
+        targetCount: 3,
+        color: cs.primaryContainer,
+      ),
+      TagAnnotation(
+        tag: 'recursion',
+        targetCount: 3,
+        color: cs.secondaryContainer,
+      ),
+      TagAnnotation(tag: 'sweeper', targetCount: 3, color: cs.outline),
+    ];
 
     return Column(
       children: [

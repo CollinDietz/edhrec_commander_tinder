@@ -27,10 +27,17 @@ class DraftProgressBar extends StatelessWidget {
     final int totalCount = basicsCount + deckCount;
     final double progress = totalCount / targetDeckSize;
     final num cost = controller.price;
+    final cs = Theme.of(context).colorScheme;
 
     return Container(
       height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: cs.surfaceVariant,
+        border: Border(
+          top: BorderSide(color: cs.outlineVariant.withOpacity(0.5)),
+        ),
+      ),
       child: Row(
         children: [
           CountLabel(totalCount: totalCount),
@@ -39,7 +46,7 @@ class DraftProgressBar extends StatelessWidget {
           const SizedBox(width: 16),
           CostLabel(cost: cost),
           const SizedBox(width: 16),
-          FinishButton(),
+          const FinishButton(),
         ],
       ),
     );

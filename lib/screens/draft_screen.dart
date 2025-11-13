@@ -184,7 +184,7 @@ class _DraftScreenState extends State<DraftScreen> {
               'assets/icons/draft.svg',
               width: 24,
               height: 24,
-              colorFilter: ColorFilter.mode(cs.primary, BlendMode.srcIn),
+              colorFilter: ColorFilter.mode(cs.onSurface, BlendMode.srcIn),
             ),
             label: 'Draft',
           ),

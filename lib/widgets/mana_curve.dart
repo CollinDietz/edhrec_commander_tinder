@@ -77,13 +77,15 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Text(
           'Avg: ${average.toStringAsFixed(2)}',
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface,
+          ),
         ),
       ],
     );
@@ -104,7 +106,8 @@ class _BucketRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final double fraction = maxCount == 0 ? 0 : bucket.count / maxCount;
-    final color = theme.colorScheme.primary;
+    final cs = theme.colorScheme;
+    final color = cs.primary;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -126,8 +129,7 @@ class _BucketRow extends StatelessWidget {
                   LinearProgressIndicator(
                     minHeight: barHeight,
                     value: fraction,
-                    backgroundColor: theme.colorScheme.surfaceContainerHighest
-                        .withOpacity(0.4),
+                    backgroundColor: cs.surfaceVariant.withOpacity(0.35),
                     valueColor: AlwaysStoppedAnimation(
                       // Preserve slight gradient feel by tweaking opacity if desired.
                       color,
@@ -139,8 +141,8 @@ class _BucketRow extends StatelessWidget {
                         bucket.count.toString(),
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: fraction > 0.18
-                              ? Colors.white
-                              : theme.colorScheme.onSurface.withOpacity(0.75),
+                              ? cs.onPrimary
+                              : cs.onSurface.withOpacity(0.75),
                           fontWeight: FontWeight.w600,
                         ),
                       ),

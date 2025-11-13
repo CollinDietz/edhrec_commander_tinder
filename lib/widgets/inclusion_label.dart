@@ -22,8 +22,25 @@ class InclusionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = textStyle;
-    final percentStr = '${stats.ratioPercent.toStringAsFixed(precision)}%';
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final ratio = stats.ratioPercent;
+    // Base style falls back to theme labelMedium.
+    final style = textStyle == const TextStyle(fontWeight: FontWeight.w600)
+        ? (theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.textTheme.labelMedium?.color ?? cs.onSurface,
+              )) ??
+              const TextStyle(fontWeight: FontWeight.w600)
+        : textStyle;
+    final percentStr = '${ratio.toStringAsFixed(precision)}%';
+    final effectiveBarColor =
+        barColor ??
+        (ratio >= 50
+            ? cs.primary
+            : ratio >= 20
+            ? cs.secondary
+            : cs.onSurfaceVariant);
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -34,7 +51,7 @@ class InclusionLabel extends StatelessWidget {
           numerator: stats.inclusion.toString(),
           denominator: stats.potentialDecks.toString(),
           width: fractionWidth,
-          color: barColor ?? (style.color ?? Colors.black54),
+          color: effectiveBarColor,
           textStyle: style,
         ),
       ],

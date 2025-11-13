@@ -1,5 +1,4 @@
 import 'package:edhrec_commander_tinder/models/card_info.dart';
-import 'package:edhrec_commander_tinder/widgets/category_tile.dart';
 import 'package:flutter/material.dart';
 
 const categoryCounts = <String, int>{
@@ -18,16 +17,28 @@ class CategoriesProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    // Build a dynamic color map aligned with current theme palette.
+    final categoryColors = <String, Color>{
+      'Creature': cs.secondary,
+      'Instant': cs.primary,
+      'Sorcery': cs.tertiary,
+      'Artifact': cs.outlineVariant,
+      'Enchantment': cs.primaryContainer,
+      'Planeswalker': cs.secondaryContainer,
+      'Land': cs.surfaceTint, // subtle accent
+    };
+
     return Column(
       children: [
-        for (final spec in categoryColors.entries)
+        for (final entry in categoryCounts.entries)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: _CategoryProgress(
-              category: spec.key,
-              color: spec.value,
-              count: cards.where((c) => c.type == spec.key).length,
-              total: categoryCounts[spec.key]!,
+              category: entry.key,
+              color: categoryColors[entry.key] ?? cs.onSurfaceVariant,
+              count: cards.where((c) => c.type == entry.key).length,
+              total: entry.value,
             ),
           ),
       ],
@@ -68,14 +79,19 @@ class _CategoryProgress extends StatelessWidget {
               Expanded(
                 child: Text(
                   category,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style:
+                      theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ) ??
+                      const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
               Text(
                 '$count of ${categoryCounts[category]!}',
-                style: theme.textTheme.labelLarge,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -85,8 +101,9 @@ class _CategoryProgress extends StatelessWidget {
             child: LinearProgressIndicator(
               minHeight: 8,
               value: (count / total).clamp(0, 1),
-              backgroundColor: theme.colorScheme.surfaceContainerHighest
-                  .withOpacity(0.4),
+              backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(
+                0.4,
+              ),
               valueColor: AlwaysStoppedAnimation(color),
             ),
           ),
