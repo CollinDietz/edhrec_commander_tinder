@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'controllers/deck_controller.dart';
-import 'screens/splash_screen.dart';
+import 'screens/loading_screen.dart';
 
 void main() {
   runApp(
@@ -23,9 +23,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const SplashScreen(),
+      home: const LoadingScreen(),
     );
   }
 }
-
-// Removed obsolete HomePage; navigation starts at SplashScreen.

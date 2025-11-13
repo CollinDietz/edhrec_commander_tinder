@@ -71,6 +71,13 @@ class Commander {
 
     final CardInfo cardInfo = CardInfo.fromJsonAndStats(json, null, null);
 
+    print('legal_commander');
+    print(json['container']['json_dict']['card']['legal_commander']);
+    print('legal_partner');
+    print(json['container']['json_dict']['card']['legal_partner']);
+    print('legal_companion');
+    print(json['container']['json_dict']['card']['legal_companion']);
+
     return Commander(
       cardInfo: cardInfo,
       basicsUrls: basicsUrl,

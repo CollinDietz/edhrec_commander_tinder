@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:edhrec_commander_tinder/screens/commander_select_screen.dart';
+import 'package:edhrec_commander_tinder/models/all_commanders.dart';
 import 'package:edhrec_commander_tinder/widgets/deck_panel.dart';
 import 'package:edhrec_commander_tinder/widgets/stats_panel.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
-import 'splash_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class FinishedScreen extends StatelessWidget {
@@ -154,11 +155,17 @@ class FinishedScreen extends StatelessWidget {
               },
               onReset: () {
                 deckCtrl.reset();
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SplashScreen()),
-                  (route) => false,
-                );
+                deckCtrl.ensureTaggerLoading();
+                // Load cached (or fetch) commander list then navigate.
+                AllCommanders.load().then((all) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CommanderSelectScreen(commanders: all),
+                    ),
+                    (route) => false,
+                  );
+                });
               },
             ),
             const Padding(padding: EdgeInsets.all(8.0), child: DeckPanel()),
