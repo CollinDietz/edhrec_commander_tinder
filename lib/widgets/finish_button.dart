@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:edhrec_commander_tinder/screens/finished_screen.dart';
-import 'package:provider/provider.dart';
-import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
 
 class FinishButton extends StatelessWidget {
   final bool compact;
@@ -9,7 +7,6 @@ class FinishButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final deckCtrl = context.watch<DeckController>();
     final cs = Theme.of(context).colorScheme;
 
     return Tooltip(
