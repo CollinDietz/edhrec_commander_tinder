@@ -29,8 +29,10 @@ class _CommanderSelectScreenState extends State<CommanderSelectScreen> {
   Widget build(BuildContext context) {
     final deck = context.watch<DeckController>();
     final all = widget.commanders;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: cs.background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -46,15 +48,17 @@ class _CommanderSelectScreenState extends State<CommanderSelectScreen> {
                     children: [
                       Text(
                         'Commander Tinder',
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.w700),
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: cs.onBackground,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Search a commander to start drafting recommendations.',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyMedium?.copyWith(color: Colors.black54),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
                       const SizedBox(height: 24),
                       RawAutocomplete<PotentialCommander>(
@@ -86,21 +90,27 @@ class _CommanderSelectScreenState extends State<CommanderSelectScreen> {
                                   labelText:
                                       'Commander Name (${all.length} loaded)',
                                   filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
+                                  fillColor: cs.surfaceVariant,
+                                  prefixIcon: Icon(
+                                    Icons.search,
+                                    color: cs.onSurfaceVariant,
                                   ),
-                                  prefixIcon: const Icon(Icons.search),
                                   suffixIcon: _selected != null
                                       ? IconButton(
                                           tooltip: 'Clear selection',
-                                          icon: const Icon(Icons.clear),
+                                          icon: Icon(
+                                            Icons.clear,
+                                            color: cs.onSurfaceVariant,
+                                          ),
                                           onPressed: () => setState(() {
                                             _selected = null;
                                             _nameController.clear();
                                           }),
                                         )
                                       : null,
+                                ),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: cs.onSurface,
                                 ),
                                 textInputAction: TextInputAction.done,
                                 onSubmitted: (_) => onFieldSubmitted(),
@@ -112,6 +122,7 @@ class _CommanderSelectScreenState extends State<CommanderSelectScreen> {
                             child: Material(
                               elevation: 6,
                               borderRadius: BorderRadius.circular(12),
+                              color: cs.surfaceVariant,
                               child: ConstrainedBox(
                                 constraints: const BoxConstraints(
                                   maxHeight: 380,
@@ -149,13 +160,18 @@ class _CommanderSelectScreenState extends State<CommanderSelectScreen> {
                                                     )
                                                   : CircleAvatar(
                                                       backgroundColor:
-                                                          const Color(
-                                                            0xFFE1E8EF,
-                                                          ),
+                                                          cs.surface,
                                                       child: Text(
                                                         opt.name.isNotEmpty
                                                             ? opt.name[0]
                                                             : '?',
+                                                        style: theme
+                                                            .textTheme
+                                                            .labelLarge
+                                                            ?.copyWith(
+                                                              color:
+                                                                  cs.onSurface,
+                                                            ),
                                                       ),
                                                     ),
                                             ),
@@ -163,9 +179,14 @@ class _CommanderSelectScreenState extends State<CommanderSelectScreen> {
                                             Expanded(
                                               child: Text(
                                                 opt.name,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                ),
+                                                style: theme
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: cs.onSurface,
+                                                    ),
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
@@ -186,7 +207,10 @@ class _CommanderSelectScreenState extends State<CommanderSelectScreen> {
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Text(
                             _error!,
-                            style: const TextStyle(color: Colors.redAccent),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: cs.error,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       AnimatedSwitcher(
@@ -238,10 +262,11 @@ class _SurfacePanel extends StatelessWidget {
   const _SurfacePanel({required this.child});
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Material(
       elevation: 6,
       borderRadius: BorderRadius.circular(28),
-      color: Colors.white,
+      color: cs.surface,
       child: child,
     );
   }

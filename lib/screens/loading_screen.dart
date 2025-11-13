@@ -39,8 +39,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: cs.background,
       body: SafeArea(
         child: Center(
           child: FutureBuilder<List<PotentialCommander>>(
@@ -112,6 +114,7 @@ class _LoadingSplashState extends State<_LoadingSplash>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
       child: Column(
@@ -130,16 +133,16 @@ class _LoadingSplashState extends State<_LoadingSplash>
               height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF4F6AA3), Color(0xFF2F3E55)],
+                gradient: LinearGradient(
+                  colors: [cs.primary, cs.surfaceVariant],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                    color: Colors.black26,
+                    color: cs.shadow.withOpacity(.6),
                     blurRadius: 18,
-                    offset: Offset(0, 10),
+                    offset: const Offset(0, 10),
                   ),
                 ],
               ),
@@ -147,7 +150,7 @@ class _LoadingSplashState extends State<_LoadingSplash>
                 child: Icon(
                   Icons.auto_awesome,
                   size: 54,
-                  color: Colors.white.withOpacity(0.9),
+                  color: cs.onPrimary.withOpacity(0.9),
                 ),
               ),
             ),
@@ -158,6 +161,7 @@ class _LoadingSplashState extends State<_LoadingSplash>
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
+              color: cs.onBackground,
             ),
           ),
           const SizedBox(height: 12),
@@ -165,8 +169,8 @@ class _LoadingSplashState extends State<_LoadingSplash>
             width: 220,
             child: LinearProgressIndicator(
               minHeight: 6,
-              backgroundColor: theme.colorScheme.surfaceContainerHighest
-                  .withOpacity(0.3),
+              backgroundColor: cs.surfaceVariant.withOpacity(0.3),
+              color: cs.primary,
             ),
           ),
           const SizedBox(height: 24),
@@ -174,7 +178,9 @@ class _LoadingSplashState extends State<_LoadingSplash>
             opacity: 0.6,
             child: Text(
               'Fetching full legal commander index…',
-              style: theme.textTheme.bodySmall,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.onBackground,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
@@ -191,10 +197,11 @@ class _ErrorPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Material(
       elevation: 6,
       borderRadius: BorderRadius.circular(28),
-      color: Colors.white,
+      color: cs.surface,
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -202,22 +209,34 @@ class _ErrorPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              children: const [
-                Icon(Icons.error_outline, size: 40, color: Colors.redAccent),
-                SizedBox(width: 12),
+              children: [
+                Icon(Icons.error_outline, size: 40, color: cs.error),
+                const SizedBox(width: 12),
                 Text(
                   'Load Error',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            Text(error, style: theme.textTheme.bodyMedium),
+            Text(
+              error,
+              style: theme.textTheme.bodyMedium?.copyWith(color: cs.onSurface),
+            ),
             const SizedBox(height: 20),
             OutlinedButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              icon: Icon(Icons.refresh, color: cs.primary),
+              label: Text('Retry', style: TextStyle(color: cs.primary)),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: cs.primary),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
             ),
           ],
         ),

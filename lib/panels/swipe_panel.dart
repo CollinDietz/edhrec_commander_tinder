@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
-import 'swipe_area.dart';
-import 'info_bar.dart';
+import '../widgets/swipe_area.dart';
+import '../widgets/info_bar.dart';
 
 class SwipePanel extends StatelessWidget {
   final MatchEngine? engine;
