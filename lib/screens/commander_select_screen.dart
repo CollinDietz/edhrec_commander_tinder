@@ -1,3 +1,4 @@
+import 'package:edhrec_commander_tinder/screens/partner_commander_select_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
@@ -231,16 +232,28 @@ class _CommanderSelectScreenState extends State<CommanderSelectScreen> {
                                   if (deck.loadError != null) {
                                     if (!mounted) return;
                                     setState(
-                                      () => _error = 'Failed to load commander',
+                                      () => _error =
+                                          'Failed to load commander: ${deck.loadError}',
                                     );
                                     return;
                                   }
                                   if (!mounted) return;
-                                  Navigator.of(context).pushReplacement(
-                                    MaterialPageRoute(
-                                      builder: (_) => const DraftScreen(),
-                                    ),
-                                  );
+
+                                  if (deck.commander!.isCompanion ||
+                                      deck.commander!.isPartner) {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const SecondaryCommanderSelectScreen(),
+                                      ),
+                                    );
+                                  } else {
+                                    Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                        builder: (_) => const DraftScreen(),
+                                      ),
+                                    );
+                                  }
                                 },
                                 child: const Icon(Icons.play_arrow),
                               ),

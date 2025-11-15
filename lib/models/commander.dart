@@ -21,6 +21,8 @@ class Commander {
   final CardInfo cardInfo;
   final List<String> basicsUrls;
   final List<CardStat> cardStats;
+  final bool isPartner;
+  final bool isCompanion;
 
   static const List<String> basics = [
     "c44f81ca-f72f-445c-8901-3a894a2a47f9", // Mountain
@@ -34,6 +36,8 @@ class Commander {
     required this.cardInfo,
     required this.basicsUrls,
     required this.cardStats,
+    required this.isPartner,
+    required this.isCompanion,
   });
 
   factory Commander.fromJson(Map<String, dynamic> json) {
@@ -71,17 +75,17 @@ class Commander {
 
     final CardInfo cardInfo = CardInfo.fromJsonAndStats(json, null, null);
 
-    print('legal_commander');
-    print(json['container']['json_dict']['card']['legal_commander']);
-    print('legal_partner');
-    print(json['container']['json_dict']['card']['legal_partner']);
-    print('legal_companion');
-    print(json['container']['json_dict']['card']['legal_companion']);
-
     return Commander(
       cardInfo: cardInfo,
       basicsUrls: basicsUrl,
       cardStats: allCards,
+      isCompanion:
+          (json['container']['json_dict']['card']['legal_companion']
+              as bool?) ??
+          false,
+      isPartner:
+          (json['container']['json_dict']['card']['legal_partner'] as bool?) ??
+          false,
     );
   }
 

@@ -81,13 +81,15 @@ class CardInfo {
         ? List<String>.unmodifiable(tagger!.getTags(oracleId))
         : const [];
 
+    final num salt = cardJson['salt'];
+
     return CardInfo(
       name: cardName,
       type: cardJson['primary_type'] as String,
       uuid: cardJson['id'] as String,
       oracleId: oracleId,
       manaCost: cardJson['cmc'] as double,
-      isSalty: cardJson['salt'] as double > 1.0,
+      isSalty: salt.toDouble() > 1.0,
       price: cardJson['prices']['tcgplayer']['price'] as double,
       imageUrls: normalImages,
       smallImageUrls: artCropImages,
