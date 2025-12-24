@@ -130,7 +130,7 @@ class _DraftScreenState extends State<DraftScreen> {
               child: Column(
                 children: [
                   Expanded(child: CommanderCardPanel()),
-                  const DraftProgressBar(),
+                  DraftProgressBar(),
                 ],
               ),
             ),
@@ -158,7 +158,36 @@ class _DraftScreenState extends State<DraftScreen> {
           Expanded(
             child: Card(
               clipBehavior: Clip.hardEdge,
-              child: Column(children: [Expanded(child: const DeckPanel())]),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: _mobileTab == 1
+                        ? StatsPanel(deckCtrl: deckCtrl)
+                        : Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: const DeckPanel(),
+                          ),
+                  ),
+                  BottomNavigationBar(
+                    backgroundColor: cs.surfaceVariant,
+                    selectedItemColor: cs.primary,
+                    unselectedItemColor: cs.onSurfaceVariant,
+                    currentIndex: _mobileTab,
+                    onTap: (i) => setState(() => _mobileTab = i),
+                    type: BottomNavigationBarType.fixed,
+                    items: [
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.layers, color: cs.onSurface),
+                        label: 'Deck',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.query_stats, color: cs.onSurface),
+                        label: 'Stats',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
