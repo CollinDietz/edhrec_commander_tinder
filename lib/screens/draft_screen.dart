@@ -124,34 +124,41 @@ class _DraftScreenState extends State<DraftScreen> {
       backgroundColor: cs.background,
       body: Row(
         children: [
-          const Expanded(child: CommanderCardPanel()),
-          Expanded(
-            flex: 2,
-            child: SwipePanel(
-              engine: _engine,
-              items: _items,
-              resolved: _resolved,
-              futures: _futures,
-              basicsLength: deckCtrl.basics.length,
-              onCardResolved: (i) {
-                if (mounted) setState(() {});
-              },
-              onItemChanged: (i) {
-                if (mounted) setState(() => _currentIndex = i);
-              },
-              currentIndex: _currentIndex,
+          const Expanded(
+            child: Card(
+              clipBehavior: Clip.hardEdge,
+              child: Column(
+                children: [
+                  Expanded(child: CommanderCardPanel()),
+                  const DraftProgressBar(),
+                ],
+              ),
             ),
           ),
           Expanded(
-            child: Column(
-              children: [
-                const DraftProgressBar(),
-                Expanded(
-                  child: _mobileTab == 3
-                      ? StatsPanel(deckCtrl: deckCtrl)
-                      : const DeckPanel(),
-                ),
-              ],
+            flex: 2,
+            child: Card(
+              clipBehavior: Clip.hardEdge,
+              child: SwipePanel(
+                engine: _engine,
+                items: _items,
+                resolved: _resolved,
+                futures: _futures,
+                basicsLength: deckCtrl.basics.length,
+                onCardResolved: (i) {
+                  if (mounted) setState(() {});
+                },
+                onItemChanged: (i) {
+                  if (mounted) setState(() => _currentIndex = i);
+                },
+                currentIndex: _currentIndex,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Card(
+              clipBehavior: Clip.hardEdge,
+              child: Column(children: [Expanded(child: const DeckPanel())]),
             ),
           ),
         ],
