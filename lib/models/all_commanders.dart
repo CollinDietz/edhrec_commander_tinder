@@ -115,7 +115,7 @@ class PotentialCommander {
 
 class AllCommanders {
   static const String _initialUrl =
-      'https://api.scryfall.com/cards/search?q=is%3Acommander+legal%3Acommander';
+      'https://api.scryfall.com/cards/search?q=is%3Acommander+(date>now+or+legal%3Acommander)';
 
   static List<PotentialCommander>? _cache;
   static Future<List<PotentialCommander>>? _inFlight;

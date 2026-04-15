@@ -25,11 +25,11 @@ class Commander {
   final bool isCompanion;
 
   static const List<String> basics = [
-    "c44f81ca-f72f-445c-8901-3a894a2a47f9", // Mountain
-    "4069fb4a-8ee1-41ef-ab93-39a8cc58e0e5", // Plains
-    "a2e22347-f0cb-4cfd-88a3-4f46a16e4946", // Island
-    "f0b234d8-d6bb-48ec-8a4d-d8a570a69c62", // Swamp
-    "a305e44f-4253-4754-b83f-1e34103d77b0", // Forest
+    "mountain",
+    "plains",
+    "island",
+    "swamp",
+    "forest",
   ];
 
   Commander({
@@ -48,12 +48,12 @@ class Commander {
     for (final Map<String, dynamic> cardList in cardLists) {
       for (final Map<String, dynamic> card in cardList['cardviews']) {
         final String url = 'https://json.edhrec.com/pages${card['url']}.json';
-        final String id = card['id'];
+        final String sanitized = card['sanitized'];
 
         final num inclusion = card['inclusion'] as num;
         final num potentialDecks = card['potential_decks'] as num;
 
-        if (basics.contains(id)) {
+        if (basics.contains(sanitized)) {
           basicsUrl.add(url);
         } else {
           uniqueCards.add(
