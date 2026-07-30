@@ -7931,7 +7931,7 @@ aQk(a){var s,r,q,p,o,n,m,l,k,j="container",i="json_dict",h=J.cW(J.cW(a.i(0,j),i)
 for(s=J.bm(h);s.u();)for(r=J.bm(s.gM().i(0,"cardviews"));r.u();){q=r.gM()
 p="https://json.edhrec.com/pages"+A.k(q.i(0,"url"))+".json"
 o=q.i(0,"sanitized")
-n=A.ea(q.i(0,"inclusion"))
+n=A.ea(q.i(0,"num_decks"))
 m=A.ea(q.i(0,"potential_decks"))
 if(B.b.t(B.Mc,o))f.push(p)
 else g.C(0,new A.lf(p,new A.agL(n,m)))}l=A.Y(g,g.$ti.c)
