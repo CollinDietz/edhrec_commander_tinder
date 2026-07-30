@@ -40,8 +40,12 @@ class Commander {
     required this.isCompanion,
   });
 
-  factory Commander.fromJson(Map<String, dynamic> json) {
-    final List<dynamic> cardLists = json['container']['json_dict']['cardlists'];
+  factory Commander.fromJson(
+    Map<String, dynamic> edhrecJsonData,
+    Map<String, dynamic> scryfallJsonData,
+  ) {
+    final List<dynamic> cardLists =
+        edhrecJsonData['container']['json_dict']['cardlists'];
 
     final Set<CardStat> uniqueCards = {};
     final List<String> basicsUrl = [];
@@ -73,18 +77,23 @@ class Commander {
 
     allCards.sort((a, b) => b.stats.ratio.compareTo(a.stats.ratio));
 
-    final CardInfo cardInfo = CardInfo.fromJsonAndStats(json, null, null);
+    final CardInfo cardInfo = CardInfo.fromJsonAndStats(
+      edhrecJsonData,
+      scryfallJsonData,
+      null,
+    );
 
     return Commander(
       cardInfo: cardInfo,
       basicsUrls: basicsUrl,
       cardStats: allCards,
       isCompanion:
-          (json['container']['json_dict']['card']['legal_companion']
+          (edhrecJsonData['container']['json_dict']['card']['legal_companion']
               as bool?) ??
           false,
       isPartner:
-          (json['container']['json_dict']['card']['legal_partner'] as bool?) ??
+          (edhrecJsonData['container']['json_dict']['card']['legal_partner']
+              as bool?) ??
           false,
     );
   }
@@ -95,8 +104,21 @@ class Commander {
     if (response.statusCode != 200) {
       throw Exception('Failed to load commander data');
     }
-    final jsonData = json.decode(response.body);
-    return Commander.fromJson(jsonData);
+    final edhrecJsonData = json.decode(response.body);
+
+    final id = edhrecJsonData['container']['json_dict']['card']['id'];
+
+    final scryfallResponse = await http.get(
+      Uri.parse('https://api.scryfall.com/cards/$id'),
+    );
+
+    if (scryfallResponse.statusCode != 200) {
+      throw Exception('Failed to load commander scryfall data');
+    }
+
+    final scryfallJsonData = json.decode(scryfallResponse.body);
+
+    return Commander.fromJson(edhrecJsonData, scryfallJsonData);
   }
 
   Future<CardInfo> getCard(int index) {
