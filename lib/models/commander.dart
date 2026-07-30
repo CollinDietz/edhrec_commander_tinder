@@ -50,7 +50,7 @@ class Commander {
         final String url = 'https://json.edhrec.com/pages${card['url']}.json';
         final String sanitized = card['sanitized'];
 
-        final num inclusion = card['inclusion'] as num;
+        final num inclusion = card['num_decks'] as num;
         final num potentialDecks = card['potential_decks'] as num;
 
         if (basics.contains(sanitized)) {
