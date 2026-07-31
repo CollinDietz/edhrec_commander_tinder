@@ -149,7 +149,7 @@ class AllCommanders {
       all.addAll(list);
       url = (data['has_more'] == true) ? data['next_page'] as String? : null;
       if (url != null) {
-        await Future.delayed(const Duration(milliseconds: 50));
+        await Future.delayed(const Duration(milliseconds: 100));
       }
     }
     return all;
