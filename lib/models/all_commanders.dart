@@ -115,7 +115,7 @@ class PotentialCommander {
 
 class AllCommanders {
   static const String _initialUrl =
-      'https://api.scryfall.com/cards/search?q=is%3Acommander+legal%3Acommander';
+      'https://api.scryfall.com/cards/search?q=is%3Acommander+(date>now+or+legal%3Acommander)';
 
   static List<PotentialCommander>? _cache;
   static Future<List<PotentialCommander>>? _inFlight;
@@ -149,7 +149,7 @@ class AllCommanders {
       all.addAll(list);
       url = (data['has_more'] == true) ? data['next_page'] as String? : null;
       if (url != null) {
-        await Future.delayed(const Duration(milliseconds: 50));
+        await Future.delayed(const Duration(milliseconds: 100));
       }
     }
     return all;

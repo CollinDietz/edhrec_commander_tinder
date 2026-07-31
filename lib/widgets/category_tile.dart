@@ -1,15 +1,5 @@
 import 'package:flutter/material.dart';
 
-const categoryColors = <String, Color>{
-  'Creature': Colors.green,
-  'Instant': Colors.blue,
-  'Sorcery': Colors.deepPurple,
-  'Artifact': Colors.grey,
-  'Enchantment': Colors.pink,
-  'Planeswalker': Colors.orange,
-  'Land': Colors.brown,
-};
-
 class CategoryTile extends StatelessWidget {
   final String category;
   final Widget child;
@@ -18,13 +8,25 @@ class CategoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    // Derive category colors from current theme; keeps palette cohesive and supports dark/light.
+    final categoryColors = <String, Color>{
+      'Creature': cs.secondary,
+      'Instant': cs.primary,
+      'Sorcery': cs.tertiary,
+      'Artifact': cs.outlineVariant,
+      'Enchantment': cs.primaryContainer,
+      'Planeswalker': cs.secondaryContainer,
+      'Land': cs.surfaceTint, // subtle accent
+    };
+    final borderColor = categoryColors[category] ?? cs.onSurfaceVariant;
 
     return ListTile(
       title: child,
-      tileColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+      tileColor: cs.surfaceVariant.withOpacity(0.6),
       shape: RoundedRectangleBorder(
         side: BorderSide(
-          color: categoryColors[category]!.withOpacity(1),
+          color: borderColor,
           width: 1, // thicker border
         ),
         borderRadius: BorderRadius.circular(12),

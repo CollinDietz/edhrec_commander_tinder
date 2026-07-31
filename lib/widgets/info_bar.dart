@@ -20,9 +20,17 @@ class InfoBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     if (currentIndex >= numItems) {
       return _wrap(
-        const Text('Done', style: TextStyle(fontWeight: FontWeight.w600)),
+        Text(
+          'Done',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: cs.onSurface,
+          ),
+        ),
       );
     }
 
@@ -38,7 +46,10 @@ class InfoBar extends StatelessWidget {
             Spacer(),
             Text(
               'Card ${currentIndex + 1}/$numItems',
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
+              ),
             ),
             Spacer(),
           ],
@@ -47,19 +58,30 @@ class InfoBar extends StatelessWidget {
     }
 
     return _wrap(
-      const SizedBox(
+      SizedBox(
         height: 20,
         width: 20,
-        child: CircularProgressIndicator(strokeWidth: 2),
+        child: CircularProgressIndicator(strokeWidth: 2, color: cs.primary),
       ),
     );
   }
 
   Widget _wrap(Widget child) {
-    return Container(
-      height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Center(child: child),
+    return Builder(
+      builder: (context) {
+        final cs = Theme.of(context).colorScheme;
+        return Container(
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: cs.surfaceVariant,
+            border: Border(
+              top: BorderSide(color: cs.outlineVariant.withOpacity(0.5)),
+            ),
+          ),
+          child: Center(child: child),
+        );
+      },
     );
   }
 }

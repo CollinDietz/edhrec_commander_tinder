@@ -65,13 +65,18 @@ class _Section extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: cs.surfaceVariant,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.4)),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 3)),
+        border: Border.all(color: cs.outlineVariant.withOpacity(0.6)),
+        boxShadow: [
+          BoxShadow(
+            color: cs.shadow.withOpacity(0.4),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
         ],
       ),
       child: Padding(
@@ -83,13 +88,14 @@ class _Section extends StatelessWidget {
               title,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: cs.onSurface,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               subtitle,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                color: cs.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 12),

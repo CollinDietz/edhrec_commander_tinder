@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
-import 'swipe_area.dart';
-import 'info_bar.dart';
+import '../widgets/swipe_area.dart';
+import '../widgets/info_bar.dart';
 
 class SwipePanel extends StatelessWidget {
   final MatchEngine? engine;
@@ -31,6 +31,7 @@ class SwipePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final deckCtrl = context.watch<DeckController>();
+    final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
         Expanded(
@@ -62,21 +63,25 @@ class SwipePanel extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
                     padding: const EdgeInsets.all(16),
+                    backgroundColor: cs.errorContainer,
+                    foregroundColor: cs.onErrorContainer,
                   ),
                   onPressed: () {
                     engine!.currentItem?.nope();
                   },
-                  child: const Icon(Icons.close_rounded),
+                  child: Icon(Icons.close_rounded, color: cs.onErrorContainer),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
                     padding: const EdgeInsets.all(16),
+                    backgroundColor: cs.primaryContainer,
+                    foregroundColor: cs.onPrimaryContainer,
                   ),
                   onPressed: () {
                     engine!.currentItem?.like();
                   },
-                  child: const Icon(Icons.favorite),
+                  child: Icon(Icons.favorite, color: cs.onPrimaryContainer),
                 ),
               ],
             ),

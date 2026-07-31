@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
 import 'package:edhrec_commander_tinder/widgets/cost_label.dart';
-import 'card_popup.dart';
+import '../widgets/card_popup.dart';
 
 class DeckPanel extends StatelessWidget {
   const DeckPanel({super.key});
 
-  Widget _labelBadge(CardLabelDescriptor label) {
+  Widget _labelBadge(BuildContext context, CardLabelDescriptor label) {
     return Padding(
       padding: const EdgeInsets.only(left: 8),
       child: Container(
@@ -21,11 +21,17 @@ class DeckPanel extends StatelessWidget {
         ),
         child: Text(
           label.shortText,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style:
+              Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                // Assume bright custom label colors; use onPrimary for contrast else fall back to onSurface.
+                color: Theme.of(context).colorScheme.onPrimary,
+              ) ??
+              const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -42,7 +48,7 @@ class DeckPanel extends StatelessWidget {
         Expanded(
           child: ListView.separated(
             itemCount: deckCtrl.basicsWithCounts.length + deckCtrl.deck.length,
-            separatorBuilder: (context, index) => SizedBox(height: 8),
+            separatorBuilder: (context, index) => const SizedBox(height: 8),
             itemBuilder: (_, i) {
               final isBasic = i < deckCtrl.basicsWithCounts.length;
               CardInfo card;
@@ -95,13 +101,18 @@ class DeckPanel extends StatelessWidget {
                           text,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ) ??
+                              const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                       ),
-                      if (labeled) _labelBadge(label),
+                      if (labeled) _labelBadge(context, label),
                       const SizedBox(width: 16),
                       CostLabel(cost: card.price),
                     ],

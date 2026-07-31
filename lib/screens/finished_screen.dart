@@ -1,12 +1,13 @@
 import 'dart:convert';
-import 'package:edhrec_commander_tinder/widgets/deck_panel.dart';
-import 'package:edhrec_commander_tinder/widgets/stats_panel.dart';
+import 'package:edhrec_commander_tinder/screens/commander_select_screen.dart';
+import 'package:edhrec_commander_tinder/models/all_commanders.dart';
+import 'package:edhrec_commander_tinder/panels/deck_panel.dart';
+import 'package:edhrec_commander_tinder/panels/stats_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
-import 'splash_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class FinishedScreen extends StatelessWidget {
@@ -107,12 +108,20 @@ class FinishedScreen extends StatelessWidget {
     final deckCtrl = context.watch<DeckController>();
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < 900;
+    final cs = Theme.of(context).colorScheme;
 
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        backgroundColor: cs.background,
         appBar: AppBar(
-          title: const Text('Deck Complete'),
+          backgroundColor: cs.surface,
+          title: Text(
+            'Deck Complete',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(color: cs.onSurface),
+          ),
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Summary', icon: Icon(Icons.info_outline)),
@@ -154,11 +163,17 @@ class FinishedScreen extends StatelessWidget {
               },
               onReset: () {
                 deckCtrl.reset();
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SplashScreen()),
-                  (route) => false,
-                );
+                deckCtrl.ensureTaggerLoading();
+                // Load cached (or fetch) commander list then navigate.
+                AllCommanders.load().then((all) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CommanderSelectScreen(commanders: all),
+                    ),
+                    (route) => false,
+                  );
+                });
               },
             ),
             const Padding(padding: EdgeInsets.all(8.0), child: DeckPanel()),
@@ -189,6 +204,7 @@ class _SummaryPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -196,17 +212,19 @@ class _SummaryPane extends StatelessWidget {
         children: [
           Text(
             deckCtrl.commander?.cardInfo.name ?? '',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: cs.onSurface,
+            ),
           ),
           const SizedBox(height: 12),
-          Icon(Icons.layers, color: Colors.green[700]),
+          Icon(Icons.layers, color: cs.secondary),
           const SizedBox(width: 8),
           Text(
             '${(deckCtrl.deck.length + deckCtrl.basics.length)} / 99 cards',
-            style: const TextStyle(
-              fontSize: 18,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: cs.onSurface,
             ),
           ),
           const SizedBox(height: 12),
@@ -214,15 +232,14 @@ class _SummaryPane extends StatelessWidget {
             'assets/icons/draft.svg',
             width: 18,
             height: 18,
-            colorFilter: ColorFilter.mode(Colors.green[700]!, BlendMode.srcIn),
+            colorFilter: ColorFilter.mode(cs.secondary, BlendMode.srcIn),
           ),
           const SizedBox(width: 8),
           Text(
             '\$${deckCtrl.price.toStringAsFixed(2)}',
-            style: const TextStyle(
-              fontSize: 18,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: cs.onSurface,
             ),
           ),
           const SizedBox(height: 24),

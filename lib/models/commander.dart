@@ -21,35 +21,43 @@ class Commander {
   final CardInfo cardInfo;
   final List<String> basicsUrls;
   final List<CardStat> cardStats;
+  final bool isPartner;
+  final bool isCompanion;
 
   static const List<String> basics = [
-    "c44f81ca-f72f-445c-8901-3a894a2a47f9", // Mountain
-    "4069fb4a-8ee1-41ef-ab93-39a8cc58e0e5", // Plains
-    "a2e22347-f0cb-4cfd-88a3-4f46a16e4946", // Island
-    "f0b234d8-d6bb-48ec-8a4d-d8a570a69c62", // Swamp
-    "a305e44f-4253-4754-b83f-1e34103d77b0", // Forest
+    "mountain",
+    "plains",
+    "island",
+    "swamp",
+    "forest",
   ];
 
   Commander({
     required this.cardInfo,
     required this.basicsUrls,
     required this.cardStats,
+    required this.isPartner,
+    required this.isCompanion,
   });
 
-  factory Commander.fromJson(Map<String, dynamic> json) {
-    final List<dynamic> cardLists = json['container']['json_dict']['cardlists'];
+  factory Commander.fromJson(
+    Map<String, dynamic> edhrecJsonData,
+    Map<String, dynamic> scryfallJsonData,
+  ) {
+    final List<dynamic> cardLists =
+        edhrecJsonData['container']['json_dict']['cardlists'];
 
     final Set<CardStat> uniqueCards = {};
     final List<String> basicsUrl = [];
     for (final Map<String, dynamic> cardList in cardLists) {
       for (final Map<String, dynamic> card in cardList['cardviews']) {
         final String url = 'https://json.edhrec.com/pages${card['url']}.json';
-        final String id = card['id'];
+        final String sanitized = card['sanitized'];
 
-        final num inclusion = card['inclusion'] as num;
+        final num inclusion = card['num_decks'] as num;
         final num potentialDecks = card['potential_decks'] as num;
 
-        if (basics.contains(id)) {
+        if (basics.contains(sanitized)) {
           basicsUrl.add(url);
         } else {
           uniqueCards.add(
@@ -69,12 +77,24 @@ class Commander {
 
     allCards.sort((a, b) => b.stats.ratio.compareTo(a.stats.ratio));
 
-    final CardInfo cardInfo = CardInfo.fromJsonAndStats(json, null, null);
+    final CardInfo cardInfo = CardInfo.fromJsonAndStats(
+      edhrecJsonData,
+      scryfallJsonData,
+      null,
+    );
 
     return Commander(
       cardInfo: cardInfo,
       basicsUrls: basicsUrl,
       cardStats: allCards,
+      isCompanion:
+          (edhrecJsonData['container']['json_dict']['card']['legal_companion']
+              as bool?) ??
+          false,
+      isPartner:
+          (edhrecJsonData['container']['json_dict']['card']['legal_partner']
+              as bool?) ??
+          false,
     );
   }
 
@@ -84,8 +104,21 @@ class Commander {
     if (response.statusCode != 200) {
       throw Exception('Failed to load commander data');
     }
-    final jsonData = json.decode(response.body);
-    return Commander.fromJson(jsonData);
+    final edhrecJsonData = json.decode(response.body);
+
+    final id = edhrecJsonData['container']['json_dict']['card']['id'];
+
+    final scryfallResponse = await http.get(
+      Uri.parse('https://api.scryfall.com/cards/$id'),
+    );
+
+    if (scryfallResponse.statusCode != 200) {
+      throw Exception('Failed to load commander scryfall data');
+    }
+
+    final scryfallJsonData = json.decode(scryfallResponse.body);
+
+    return Commander.fromJson(edhrecJsonData, scryfallJsonData);
   }
 
   Future<CardInfo> getCard(int index) {

@@ -7,6 +7,7 @@ class CardImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(
         top: Radius.circular(12),
@@ -16,10 +17,19 @@ class CardImage extends StatelessWidget {
         url,
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) =>
-            Center(child: Icon(Icons.broken_image)),
+            Center(child: Icon(Icons.broken_image, color: cs.error)),
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
-          return Center(child: CircularProgressIndicator());
+          return Center(
+            child: SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
+                color: cs.primary,
+                strokeWidth: 3,
+              ),
+            ),
+          );
         },
       ),
     );

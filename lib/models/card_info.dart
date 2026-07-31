@@ -50,36 +50,45 @@ class CardInfo {
 
   factory CardInfo.fromJsonAndStats(
     Map<String, dynamic> edhrecJson,
-    Map<String, dynamic>? scryfallJson,
+    Map<String, dynamic> scryfallJson,
     RecommendationStats? stats, {
     Tagger? tagger,
   }) {
-    final cardJson = edhrecJson['container']['json_dict']['card'];
-    final List<dynamic> imageUris = cardJson['image_uris'] as List<dynamic>;
     final normalImages = <String>[];
     final artCropImages = <String>[];
-    for (final uriEntry in imageUris) {
-      if (uriEntry is Map<String, dynamic>) {
-        final normal = uriEntry['normal'];
-        final art = uriEntry['art_crop'];
-        if (normal is String) normalImages.add(normal);
-        if (art is String) artCropImages.add(art);
+
+    if (scryfallJson['image_uris'] != null) {
+      final Map<String, dynamic> imageUris =
+          scryfallJson['image_uris'] as Map<String, dynamic>;
+
+      normalImages.add(imageUris['normal']);
+      artCropImages.add(imageUris['art_crop']);
+    } else if (scryfallJson['card_faces'] != null) {
+      final List<dynamic> cardFaces =
+          scryfallJson['card_faces'] as List<dynamic>;
+
+      for (final Map<String, dynamic> cardFace in cardFaces) {
+        final Map<String, dynamic> imageUris =
+            cardFace['image_uris'] as Map<String, dynamic>;
+        normalImages.add(imageUris['normal']);
+        artCropImages.add(imageUris['art_crop']);
       }
     }
 
-    final bool isGameChange = scryfallJson != null
-        ? (scryfallJson['game_changer'] == true)
-        : false;
+    final bool isGameChange = scryfallJson['game_changer'] == true;
 
-    final String oracleId =
-        scryfallJson != null && scryfallJson['oracle_id'] is String
+    final String oracleId = scryfallJson['oracle_id'] is String
         ? scryfallJson['oracle_id'] as String
         : '';
+
+    final cardJson = edhrecJson['container']['json_dict']['card'];
 
     final cardName = cardJson['name'] as String;
     final List<String> tags = (tagger?.isLoaded ?? false)
         ? List<String>.unmodifiable(tagger!.getTags(oracleId))
         : const [];
+
+    final num salt = cardJson['salt'];
 
     return CardInfo(
       name: cardName,
@@ -87,7 +96,7 @@ class CardInfo {
       uuid: cardJson['id'] as String,
       oracleId: oracleId,
       manaCost: cardJson['cmc'] as double,
-      isSalty: cardJson['salt'] as double > 1.0,
+      isSalty: salt.toDouble() > 1.0,
       price: cardJson['prices']['tcgplayer']['price'] as double,
       imageUrls: normalImages,
       smallImageUrls: artCropImages,

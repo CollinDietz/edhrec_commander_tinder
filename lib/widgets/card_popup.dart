@@ -10,9 +10,12 @@ class CardPopup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Dialog(
       insetPadding: const EdgeInsets.all(16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      backgroundColor: cs.surface,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -28,17 +31,40 @@ class CardPopup extends StatelessWidget {
                       onRemove!.call();
                       Navigator.of(context).pop();
                     },
-                    icon: const Icon(Icons.delete_outline),
-                    label: const Text('Remove Card'),
+                    icon: Icon(
+                      Icons.delete_outline,
+                      color: cs.onErrorContainer,
+                    ),
+                    label: Text(
+                      'Remove Card',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: cs.onErrorContainer,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     style: TextButton.styleFrom(
-                      foregroundColor: Colors.redAccent,
+                      backgroundColor: cs.errorContainer,
+                      foregroundColor: cs.onErrorContainer,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   )
                 else
-                  SizedBox(),
+                  const SizedBox(),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Close'),
+                  child: Text(
+                    'Close',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: cs.primary,
+                    ),
+                  ),
                 ),
               ],
             ),

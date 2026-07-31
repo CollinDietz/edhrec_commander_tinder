@@ -1,5 +1,5 @@
 import 'package:edhrec_commander_tinder/widgets/draft_progress_bar.dart';
-import 'package:edhrec_commander_tinder/widgets/stats_panel.dart';
+import 'package:edhrec_commander_tinder/panels/stats_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:edhrec_commander_tinder/controllers/deck_controller.dart';
@@ -9,9 +9,9 @@ import 'finished_screen.dart';
 import 'package:edhrec_commander_tinder/models/card_info.dart';
 import 'package:edhrec_commander_tinder/widgets/card_with_info.dart';
 import 'package:edhrec_commander_tinder/models/tagger.dart';
-import 'package:edhrec_commander_tinder/widgets/deck_panel.dart';
+import 'package:edhrec_commander_tinder/panels/deck_panel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:edhrec_commander_tinder/widgets/swipe_panel.dart';
+import 'package:edhrec_commander_tinder/panels/swipe_panel.dart';
 
 class DraftScreen extends StatefulWidget {
   const DraftScreen({super.key});
@@ -105,7 +105,11 @@ class _DraftScreenState extends State<DraftScreen> {
     final deckCtrl = context.watch<DeckController>();
     final commander = deckCtrl.commander;
     if (commander == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      final cs = Theme.of(context).colorScheme;
+      return Scaffold(
+        backgroundColor: cs.background,
+        body: Center(child: CircularProgressIndicator(color: cs.primary)),
+      );
     }
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < 900;
@@ -115,37 +119,75 @@ class _DraftScreenState extends State<DraftScreen> {
   }
 
   Widget _buildDesktopLayout(DeckController deckCtrl, Commander commander) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
+      backgroundColor: cs.background,
       body: Row(
         children: [
-          const Expanded(child: CommanderCardPanel()),
-          Expanded(
-            flex: 2,
-            child: SwipePanel(
-              engine: _engine,
-              items: _items,
-              resolved: _resolved,
-              futures: _futures,
-              basicsLength: deckCtrl.basics.length,
-              onCardResolved: (i) {
-                if (mounted) setState(() {});
-              },
-              onItemChanged: (i) {
-                if (mounted) setState(() => _currentIndex = i);
-              },
-              currentIndex: _currentIndex,
+          const Expanded(
+            child: Card(
+              clipBehavior: Clip.hardEdge,
+              child: Column(
+                children: [
+                  Expanded(child: CommanderCardPanel()),
+                  DraftProgressBar(),
+                ],
+              ),
             ),
           ),
           Expanded(
-            child: Column(
-              children: [
-                const DraftProgressBar(),
-                Expanded(
-                  child: _mobileTab == 3
-                      ? StatsPanel(deckCtrl: deckCtrl)
-                      : const DeckPanel(),
-                ),
-              ],
+            flex: 2,
+            child: Card(
+              clipBehavior: Clip.hardEdge,
+              child: SwipePanel(
+                engine: _engine,
+                items: _items,
+                resolved: _resolved,
+                futures: _futures,
+                basicsLength: deckCtrl.basics.length,
+                onCardResolved: (i) {
+                  if (mounted) setState(() {});
+                },
+                onItemChanged: (i) {
+                  if (mounted) setState(() => _currentIndex = i);
+                },
+                currentIndex: _currentIndex,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Card(
+              clipBehavior: Clip.hardEdge,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: _mobileTab == 1
+                        ? StatsPanel(deckCtrl: deckCtrl)
+                        : Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: const DeckPanel(),
+                          ),
+                  ),
+                  BottomNavigationBar(
+                    backgroundColor: cs.surfaceVariant,
+                    selectedItemColor: cs.primary,
+                    unselectedItemColor: cs.onSurfaceVariant,
+                    currentIndex: _mobileTab,
+                    onTap: (i) => setState(() => _mobileTab = i),
+                    type: BottomNavigationBarType.fixed,
+                    items: [
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.layers, color: cs.onSurface),
+                        label: 'Deck',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.query_stats, color: cs.onSurface),
+                        label: 'Stats',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -154,8 +196,11 @@ class _DraftScreenState extends State<DraftScreen> {
   }
 
   Widget _buildMobileLayout(DeckController deckCtrl, Commander commander) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
+      backgroundColor: cs.background,
       appBar: AppBar(
+        backgroundColor: cs.surface,
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(0),
           child: DraftProgressBar(),
@@ -163,6 +208,9 @@ class _DraftScreenState extends State<DraftScreen> {
       ),
       body: _buildMobileContent(deckCtrl, commander),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: cs.surface,
+        selectedItemColor: cs.primary,
+        unselectedItemColor: cs.onSurfaceVariant,
         currentIndex: _mobileTab,
         onTap: (i) => setState(() => _mobileTab = i),
         type: BottomNavigationBarType.fixed,
@@ -172,23 +220,20 @@ class _DraftScreenState extends State<DraftScreen> {
               'assets/icons/draft.svg',
               width: 24,
               height: 24,
-              colorFilter: ColorFilter.mode(
-                Theme.of(context).colorScheme.onSurface,
-                BlendMode.srcIn,
-              ),
+              colorFilter: ColorFilter.mode(cs.onSurface, BlendMode.srcIn),
             ),
             label: 'Draft',
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.shield),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shield, color: cs.onSurface),
             label: 'Commander',
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.layers),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.layers, color: cs.onSurface),
             label: 'Deck',
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.query_stats),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.query_stats, color: cs.onSurface),
             label: 'Stats',
           ),
         ],
@@ -233,7 +278,8 @@ class CommanderCardPanel extends StatelessWidget {
     final deckCtrl = context.watch<DeckController>();
     final commander = deckCtrl.commander;
     if (commander == null) {
-      return const Center(child: CircularProgressIndicator());
+      final cs = Theme.of(context).colorScheme;
+      return Center(child: CircularProgressIndicator(color: cs.primary));
     }
     return LayoutBuilder(
       builder: (context, constraints) {

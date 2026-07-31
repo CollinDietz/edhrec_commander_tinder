@@ -9,22 +9,30 @@ class CountLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Row(
       children: [
-        _buildIcon(),
+        _buildIcon(cs),
         const SizedBox(width: 8),
         Text(
           '$totalCount/${DraftProgressBar.targetDeckSize}',
-          style: textStyle ?? const TextStyle(fontWeight: FontWeight.w600),
+          style:
+              textStyle ??
+              theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
+              ) ??
+              const TextStyle(fontWeight: FontWeight.w600),
         ),
       ],
     );
   }
 
-  Widget _buildIcon() {
+  Widget _buildIcon(ColorScheme cs) {
     return Icon(
       Icons.layers,
-      color: Colors.green[700],
+      color: cs.secondary,
       size: 20,
       semanticLabel: 'Deck progress',
     );
